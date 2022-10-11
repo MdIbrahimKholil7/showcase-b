@@ -1,0 +1,39 @@
+{
+  "name": "showcase",
+  "version": "1.0.0",
+  "description": "Showcase application",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "server": "nodemon server.js",
+    "client-install": "npm install --force --prefix client",
+    "client": "npm start --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "build": "npm run build --prefix client"
+  },
+  "keywords": [
+    "sc"
+  ],
+  "author": "shaurya",
+  "license": "ISC",
+  "dependencies": {
+    "aws-sdk": "^2.1156.0",
+    "bcrypt": "^5.0.1",
+    "cloudinary": "^1.30.0",
+    "concurrently": "^7.2.1",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.2",
+    "express": "^4.18.1",
+    "express-fileupload": "^1.3.1",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.3.4",
+    "nodemailer": "^6.7.8",
+    "nodemailer-sendgrid-transport": "^0.2.0",
+    "razorpay": "^2.8.3",
+    "twilio": "^3.77.1"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.16"
+  }
+}
