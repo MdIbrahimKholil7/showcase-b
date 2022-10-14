@@ -16,6 +16,9 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
     },
+    loginBy: {
+      type: String,
+    },
     phone: {
       type: String,
       default: "",
@@ -32,15 +35,15 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    latitude:{
-       type:Number,
-        default:0
+    latitude: {
+      type: Number,
+      default: 0
 
     },
-    longitude:{
+    longitude: {
 
-        type:Number,
-        default:0
+      type: Number,
+      default: 0
     },
     profile: {
       type: String,
@@ -58,7 +61,7 @@ const userSchema = new mongoose.Schema(
       type: Array,
       default: [],
     },
-    loginBy:String
+    loginBy: String || Null
   },
   {
     timestamps: true,

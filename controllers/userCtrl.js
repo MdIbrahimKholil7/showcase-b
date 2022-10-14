@@ -4,6 +4,7 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const client = require("twilio")(process.env.acountSID, process.env.authToken)
 const axios = require('axios');
+const { findOneAndUpdate } = require('../models/userModel');
 
 
 const userCtrl = {
@@ -15,12 +16,13 @@ const userCtrl = {
         try {
 
             const { name, email, role, password, google } = req.body;
-           
+
             // verify user for only google authentication 
             if (google) {
+                console
                 if (email) {
                     const user = await Users.findOne({ email })
-                   
+
                     if (user) return res.status(400).json({ msg: "The email already exists." })
                     let newAccount = await Users.create({
                         email,
@@ -29,8 +31,8 @@ const userCtrl = {
                         loginBy: google
                     })
                     newAccount.save()
-                    newUser =newAccount
-                  
+                    newUser = newAccount
+
                 }
             } else {
 
@@ -61,7 +63,7 @@ const userCtrl = {
                 path: '/user/refresh_token',
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7d
             })
-           
+
             res.json({ accesstoken })
 
         } catch (err) {
@@ -79,6 +81,7 @@ const userCtrl = {
         const result = await Users.find({ email: req.body.email })
         res.send(result)
     },
+
 
     login: async (req, res) => {
         console.log(req.body, 'from login')
@@ -142,6 +145,44 @@ const userCtrl = {
             return res.status(500).json({ msg: err.message })
         }
     },
+
+    updatePass: async (req, res) => {
+        try {
+            const { oldPassword, newPassword, google } = req.body || {}
+            const user = await Users.findById({ _id: req.user.id })
+      
+            if (!google) {
+               
+                const isMatch = await bcrypt.compare(oldPassword, user.password)
+                if (isMatch) {
+                    // Password Encryption
+                    const passwordHash = await bcrypt.hash(newPassword, 10)
+                    const result = await Users.findOneAndUpdate({ email: user.email }, { password: passwordHash })
+                    console.log(passwordHash)
+                    console.log('from update pass', result)
+                    if (result) {
+                        res.status(200).send({
+                            message: 'Success',
+                            status: true
+                        })
+                    }
+                }else{
+                    res.status(401).json({
+                        message:'Password is incorrect'
+                    })
+                }
+
+            } else {
+                res.status(401).json({
+                    msg: "You can't change the password"
+                })
+            }
+
+        } catch (error) {
+            console.log(error)
+        }
+    },
+
     refreshToken: (req, res) => {
         try {
             const rf_token = req.cookies.refreshtoken;
@@ -171,7 +212,8 @@ const userCtrl = {
     },
     getImage: async (req, res) => {
         try {
-            const user = await Users.findById(req.user.id).select('profile name about')
+            const user = await Users.findById(req.user.id).select('profile name about whats phone')
+            console.log('user', user)
             if (!user) return res.status(400).json({ msg: "User does not exist." })
             res.json(user)
             console.log("dff")
@@ -254,8 +296,8 @@ const userCtrl = {
     complete: async (req, res) => {
         try {
             const user = await Users.findById(req.user.id)
-            console.log(user,'complete')
-            console.log(req.user.id,'complete')
+            console.log(user, 'complete')
+            console.log(req.user.id, 'complete')
             if (!user) return res.status(400).json({ msg: "User does not exist." })
 
             const params = {

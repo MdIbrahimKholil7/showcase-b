@@ -6,8 +6,11 @@ const auth = require('../middleware/auth')
 router.post('/register',userCtrl.register)
 
 router.post('/login', userCtrl.login)
+
 router.delete('/delete',userCtrl.deleteUser)
+
 router.get('/find',userCtrl.findUser)
+
 router.get('/logout', userCtrl.logout)
 
 router.get('/refresh_token', userCtrl.refreshToken)
@@ -21,6 +24,8 @@ router.get('/getotp', auth,  userCtrl.getOTP)
 // router.post('/checkotp', auth,  userCtrl.checkOTP)
 
 router.patch('/personal',auth, userCtrl.About)
+
+router.patch('/changePass',auth, userCtrl.updatePass)
 
 router.patch('/address',auth, userCtrl.AddressUpdate)
 
