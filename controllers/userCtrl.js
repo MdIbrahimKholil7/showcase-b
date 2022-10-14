@@ -150,9 +150,9 @@ const userCtrl = {
         try {
             const { oldPassword, newPassword, google } = req.body || {}
             const user = await Users.findById({ _id: req.user.id })
-      
+
             if (!google) {
-               
+
                 const isMatch = await bcrypt.compare(oldPassword, user.password)
                 if (isMatch) {
                     // Password Encryption
@@ -166,9 +166,9 @@ const userCtrl = {
                             status: true
                         })
                     }
-                }else{
+                } else {
                     res.status(401).json({
-                        message:'Password is incorrect'
+                        message: 'Password is incorrect'
                     })
                 }
 
@@ -348,20 +348,24 @@ const userCtrl = {
 
 
             const resp = await axios.get('http://api.positionstack.com/v1/forward', { params })
-            console.log(resp.data.data[0])
-            var lat = resp.data.data[0].latitude;
-            var lang = resp.data.data[0].longitude;
-            var country = resp.data.data[0].country;
+            console.log('from address', resp.data.data[0])
+            console.log('from address ok',resp.data.data)
+            const lat = resp.data.data[0].latitude;
+            const lang = resp.data.data[0].longitude;
+            const country = resp.data.data[0].country;
 
 
-            await Users.findOneAndUpdate({ _id: req.user.id }, {
+            const result = await Users.findOneAndUpdate({ _id: req.user.id }, {
                 address: req.body.address,
                 country: country,
                 latitude: lat,
                 longitude: lang,
             })
 
-            return res.json({ msg: "Address Completed" })
+            return res.status(200).json({
+                msg: "Address Completed",
+                data: result
+            })
 
 
         } catch (err) {
