@@ -10,7 +10,7 @@ router.post('/login', userCtrl.login)
 router.delete('/delete',userCtrl.deleteUser)
 
 router.get('/find',userCtrl.findUser)
-
+router.get('/getUser',auth,userCtrl.getUser)
 router.get('/logout', userCtrl.logout)
 
 router.get('/refresh_token', userCtrl.refreshToken)

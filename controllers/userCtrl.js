@@ -60,7 +60,6 @@ const userCtrl = {
 
             res.cookie('refreshtoken', refreshtoken, {
                 httpOnly: true,
-                path: '/user/refresh_token',
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7d
             })
 
@@ -72,7 +71,13 @@ const userCtrl = {
             return res.status(500).json({ news, msg: err.message })
         }
     },
-
+    getUser: async (req, res) => {
+        try {
+            console.log('from get user',req.user)
+        } catch (error) {
+           
+        }
+    },
     deleteUser: async (req, res) => {
         const result = await Users.deleteOne({ email: req.body.email })
         res.send(result)
@@ -126,7 +131,6 @@ const userCtrl = {
             console.log(userrole)
             res.cookie('refreshtoken', refreshtoken, {
                 httpOnly: true,
-                path: '/user/refresh_token',
                 maxAge: 7 * 24 * 60 * 60 * 1000 // 7d
             })
 
@@ -339,6 +343,7 @@ const userCtrl = {
     AddressUpdate: async (req, res) => {
         try {
             const user = await Users.findById(req.user.id)
+            console.log(user)
             if (!user) return res.status(400).json({ msg: "User does not exist." })
 
             const params = {
@@ -349,7 +354,7 @@ const userCtrl = {
 
             const resp = await axios.get('http://api.positionstack.com/v1/forward', { params })
             console.log('from address', resp.data.data[0])
-            console.log('from address ok',resp.data.data)
+            console.log('from address ok', resp.data.data)
             const lat = resp.data.data[0].latitude;
             const lang = resp.data.data[0].longitude;
             const country = resp.data.data[0].country;
