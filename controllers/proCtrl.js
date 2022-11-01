@@ -55,9 +55,9 @@ class APIfeatures {
 // for posting video 
 const saveVideo = async (Collection, data, res) => {
     const { link, companyName, email, productBrand, productType, category, price, description, userId } = data?.data || {};
-    console.log('data',data?.video)
+    console.log('data', data?.video)
     const newProduct = new Collection({
-        link:data?.video,
+        link: data?.video,
         companyName,
         email,
         brand: productBrand,
@@ -65,10 +65,10 @@ const saveVideo = async (Collection, data, res) => {
         category,
         price,
         Description: description,
-        userId:data?.userId
+        userId: data?.userId
     })
     const newItem = new ProUser({
-        link:data?.video,
+        link: data?.video,
         companyName,
         email,
         brand: productBrand,
@@ -76,7 +76,7 @@ const saveVideo = async (Collection, data, res) => {
         category,
         price,
         Description: description,
-        userId:data?.userId
+        userId: data?.userId
     })
     const itemResult = await newItem.save()
     const result = await newProduct.save()
@@ -85,7 +85,7 @@ const saveVideo = async (Collection, data, res) => {
 }
 
 const productCtrl = {
-    
+
     getProducts: async (req, res) => {
         try {
             const features = new APIfeatures(ProUser.find(), req.query)
@@ -106,16 +106,16 @@ const productCtrl = {
 
     getAdminVideo: async (req, res) => {
         try {
-            const result = await ProUser.find({userId:req?.user?.id})
-            console.log('admin video',result)
+            const result = await ProUser.find({ userId: req?.user?.id })
+            console.log('admin video', result)
             res.status(200).send({
-                message:'Success',
-                data:result
+                message: 'Success',
+                data: result
             })
         } catch (error) {
             console.log(error)
         }
-    },  
+    },
 
     createProduct: async (req, res) => {
         try {
@@ -155,6 +155,68 @@ const productCtrl = {
             return res.status(500).json({ msg: err.message })
         }
     },
+
+    getMinPrice: async (req, res) => {
+
+        try {
+
+            const min = await ProUser.find().sort({ price: 1 }).limit(1)
+            const max = await ProUser.find().sort({ price: -1 }).limit(1)
+            res.status(200).send({
+                data: {
+                    min: min[0]?.price,
+                    max: max[0]?.price,
+                }
+            })
+        } catch (error) {
+            console.log(error)
+            res.status(500).send({
+                message: "Internal server error"
+            })
+        }
+    },
+
+    getFilterProduct: async (req, res) => {
+        try {
+            const { content, user } = req.query || {}
+            console.log(req.query)
+            console.log(new RegExp(content, 'i'))
+            switch (user) {
+                case "Men":
+                    const result = await Men.find({ category: new RegExp(content, 'i') })
+                    console.log(result)
+                    return res.status(200).send({
+                        result
+                    })
+                case "Kids":
+                    const kidsResult = await Kids.find({ category: new RegExp(content, 'i') })
+                    return res.status(200).send({
+                        kidsResult
+                    })
+
+                case "Women":
+                    const womenResult = await Women.find({ category: new RegExp(content, 'i') })
+                    return res.status(200).send({
+                        result:womenResult
+                    })
+
+                case "Home&Kitchen":
+                    const homeResult = await HomeKitchen.find({ category: new RegExp(content, 'i') })
+                    return res.status(200).send({
+                        homeResult
+                    })
+
+
+                default:
+                    return res.send({
+                        message: 'No video uploaded'
+                    })
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    },
+
     deleteProduct: async (req, res) => {
         try {
             await ProUser.findByIdAndDelete(req.params.id)
@@ -195,6 +257,10 @@ const productCtrl = {
             return res.status(500).json({ msg: err.message })
         }
     }
+
+
+
+
 }
 
 

@@ -13,9 +13,10 @@ router.route('/products/:id')
     .patch(auth, authAdmin, productCtrl.updateProduct)
 
 router.route('/adminProductVideo')
-    .get(auth,authAdmin,productCtrl.getAdminVideo)
+    .get(auth, authAdmin, productCtrl.getAdminVideo)
 router.route('/search/:key').get(productCtrl.searchProduct)
+router.get('/min-max-price', productCtrl.getMinPrice)
 
-
+router.get('/get-product', productCtrl.getFilterProduct)
 
 module.exports = router
