@@ -17,6 +17,8 @@ router.get('/refresh_token', userCtrl.refreshToken)
 
 router.get('/infor', auth,  userCtrl.getUser)
 
+// for valid user 
+router.get('/validation',auth,userCtrl.validation)
 router.get('/getpic',auth,userCtrl.getImage)
 
 router.get('/getotp', auth,  userCtrl.getOTP)

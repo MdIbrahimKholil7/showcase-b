@@ -57,10 +57,6 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
-    saved: {
-      type: Array,
-      default: [],
-    },
     loginBy: String || Null
   },
   {
@@ -69,3 +65,6 @@ const userSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model("Users", userSchema);
+
+
+

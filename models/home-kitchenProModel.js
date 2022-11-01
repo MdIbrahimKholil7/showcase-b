@@ -2,7 +2,7 @@ const { text } = require('express')
 const mongoose = require('mongoose')
 
 // schema 
-const BusSchema = new mongoose.Schema({
+const homeKitchenSchema = new mongoose.Schema({
 
     link: {
         type: String,
@@ -40,7 +40,6 @@ const BusSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    // vaw2-uBFtqoinN0rDnbXYR9GkPe-_T-xgqr10HXW
     Description: {
         type: String,
         required: true
@@ -50,12 +49,12 @@ const BusSchema = new mongoose.Schema({
         required: true
     },
     videoOwner: {
-        type: mongoose.Schema.ObjectId,
-        ref: 'userModel',
-        // required:true
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'userSchema'
     }
+
 }, {
     timestamps: true
 })
 
-module.exports = mongoose.model('ProUser', BusSchema)
+module.exports = mongoose.model('HomeKitchen', homeKitchenSchema)

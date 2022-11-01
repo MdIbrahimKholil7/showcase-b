@@ -57,10 +57,14 @@ const userCtrl = {
             // Then create jsonwebtoken to authentication
             const accesstoken = createAccessToken({ id: newUser._id })
             const refreshtoken = createRefreshToken({ id: newUser._id })
-
-            res.cookie('refreshtoken', refreshtoken, {
+            console.log(newUser)
+            res.cookie('token', accesstoken, {
+                maxAge: 7 * 24 * 60 * 60 * 1000,// 7d
                 httpOnly: true,
-                maxAge: 7 * 24 * 60 * 60 * 1000 // 7d
+                /* signed: true,
+                secure: true,
+                sameSite:'none', */
+                
             })
 
             res.json({ accesstoken })
@@ -71,11 +75,26 @@ const userCtrl = {
             return res.status(500).json({ news, msg: err.message })
         }
     },
+
+
+    validation: async (req,res) => {
+        try {
+            console.log('from validation',req.user)
+            if(req.user.id){
+                res.status(200).json({
+                    message:'Success'
+                })
+            }
+        } catch (error) {
+            
+            console.log(error)
+        }
+    },
     getUser: async (req, res) => {
         try {
-            console.log('from get user',req.user)
+            console.log('from get user', req.user)
         } catch (error) {
-           
+
         }
     },
     deleteUser: async (req, res) => {
@@ -88,7 +107,7 @@ const userCtrl = {
     },
 
 
-    login: async (req, res) => {
+    login: async (req, res, next) => {
         console.log(req.body, 'from login')
         try {
             let userrole;
@@ -98,12 +117,12 @@ const userCtrl = {
 
 
             const { email, password, google } = req.body;
-            console.log(req.body, 'from login')
+
             if (google) {
                 if (email) {
-                    console.log('in')
+
                     const user = await Users.findOne({ email })
-                    console.log(user, 'user')
+
                     if (!user) return res.status(400).json({ msg: "User does not exist." })
                     accesstoken = createAccessToken({ id: user._id })
                     refreshtoken = createRefreshToken({ id: user._id })
@@ -116,7 +135,7 @@ const userCtrl = {
                 if (!user) return res.status(400).json({ msg: "User does not exist." })
 
                 const isMatch = await bcrypt.compare(password, user.password)
-                console.log('from pass', user)
+
                 if (!isMatch) return res.status(400).json({ msg: "Incorrect password." })
                 // If login success , create access token and refresh token
                 accesstoken = createAccessToken({ id: user._id })
@@ -128,14 +147,16 @@ const userCtrl = {
 
 
             const val = userrole.role;
-            console.log(userrole)
-            res.cookie('refreshtoken', refreshtoken, {
-                httpOnly: true,
-                maxAge: 7 * 24 * 60 * 60 * 1000 // 7d
+
+            res.cookie('token', accesstoken, {
+                maxAge: 7 * 24 * 60 * 60 * 1000,// 7d
+                httpOnly: false,
+                // signed: true,
+                // secure: true,
+                // sameSite:'none',
             })
-
+            // next()
             res.json({ accesstoken, val })
-
         } catch (err) {
             console.log(err)
             return res.status(500).json({ msg: err.message })
@@ -143,7 +164,7 @@ const userCtrl = {
     },
     logout: async (req, res) => {
         try {
-            res.clearCookie('refreshtoken', { path: '/user/refresh_token' })
+            res.clearCookie('token')
             return res.json({ msg: "Logged out" })
         } catch (err) {
             return res.status(500).json({ msg: err.message })
@@ -271,7 +292,6 @@ const userCtrl = {
             const user = await Users.findById(req.user.id)
             if (!user) return res.status(400).json({ msg: "User does not exist." })
 
-
             await Users.findOneAndUpdate({ _id: req.user.id }, {
                 about: req.body.about,
                 profile: req.body.profile,
@@ -279,7 +299,6 @@ const userCtrl = {
             })
             console.log("cdcc")
             return res.json({ msg: "Done Bro" })
-
 
         } catch (err) {
             return res.status(500).json({ msg: err.message })
@@ -384,7 +403,7 @@ const userCtrl = {
             const user = await Users.findById(req.user.id)
             if (!user) return res.status(400).json({ msg: "User does not exist." })
 
-            await Users.findOneAndUpdate({ _id: req.user.id }, {
+           const result= await Users.findOneAndUpdate({ _id: req.user.id }, {
                 name: req.body.name,
                 phone: req.body.phone,
                 about: req.body.about,
@@ -392,7 +411,8 @@ const userCtrl = {
                 profile: req.body.profile
 
             })
-
+            console.log(req.body)
+            console.log('from edit',result)
             return res.json({ msg: "Completed" })
 
 
