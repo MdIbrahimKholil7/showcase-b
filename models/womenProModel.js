@@ -40,6 +40,9 @@ const womenSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    discount:{
+        type:Number
+    },
     Description: {
         type: String,
         required: true

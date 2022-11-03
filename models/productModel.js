@@ -40,6 +40,9 @@ const BusSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    discount:{
+        type:Number
+    },
     // vaw2-uBFtqoinN0rDnbXYR9GkPe-_T-xgqr10HXW
     Description: {
         type: String,

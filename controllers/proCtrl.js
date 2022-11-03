@@ -4,8 +4,9 @@ const Women = require('../models/womenProModel')
 const Kids = require('../models/kidsProModel')
 const Men = require('../models/menProModel')
 const HomeKitchen = require('../models/home-kitchenProModel')
-
-// Filter, sorting and paginating
+const { ObjectId } = require('mongodb')
+// Filter, sorting and paginatin
+let count;
 
 class APIfeatures {
     constructor(query, queryString) {
@@ -54,7 +55,7 @@ class APIfeatures {
 
 // for posting video 
 const saveVideo = async (Collection, data, res) => {
-    const { link, companyName, email, productBrand, productType, category, price, description, userId } = data?.data || {};
+    const { link, companyName, email, productBrand, productType, category, price, description, userId, discount } = data?.data || {};
     console.log('data', data?.video)
     const newProduct = new Collection({
         link: data?.video,
@@ -65,6 +66,7 @@ const saveVideo = async (Collection, data, res) => {
         category,
         price,
         Description: description,
+        discount,
         userId: data?.userId
     })
     const newItem = new ProUser({
@@ -76,6 +78,7 @@ const saveVideo = async (Collection, data, res) => {
         category,
         price,
         Description: description,
+        discount,
         userId: data?.userId
     })
     const itemResult = await newItem.save()
@@ -83,6 +86,17 @@ const saveVideo = async (Collection, data, res) => {
     console.log('result', result)
     res.json({ msg: "Created a product", result })
 }
+
+
+
+const productCount = async (collection, content, res) => {
+    const results = collection.find({ category: new RegExp(content, 'i') })
+    count = await results.count()
+
+}
+
+
+
 
 const productCtrl = {
 
@@ -106,7 +120,8 @@ const productCtrl = {
 
     getAdminVideo: async (req, res) => {
         try {
-            const result = await ProUser.find({ userId: req?.user?.id })
+            const results = ProUser.find({ userId: req?.user?.id })
+            const result = await results
             console.log('admin video', result)
             res.status(200).send({
                 message: 'Success',
@@ -142,15 +157,6 @@ const productCtrl = {
                 saveVideo(HomeKitchen, req?.body, res)
             }
 
-            /*  const newProduct = new ProUser({
-                 link, companyName, email, brand, type, category, price, Description,
-                 latitude, longitude
-             })
- 
-             const result = await newProduct.save()
-             console.log('result', result)
-             res.json({ msg: "Created a product", result })
-  */
         } catch (err) {
             return res.status(500).json({ msg: err.message })
         }
@@ -159,15 +165,50 @@ const productCtrl = {
     getMinPrice: async (req, res) => {
 
         try {
+            const { content } = req.query || {}
 
-            const min = await ProUser.find().sort({ price: 1 }).limit(1)
-            const max = await ProUser.find().sort({ price: -1 }).limit(1)
-            res.status(200).send({
-                data: {
-                    min: min[0]?.price,
-                    max: max[0]?.price,
-                }
-            })
+            switch (content) {
+
+                case 'Men':
+                    const min = await Men.find().sort({ price: 1 }).limit(1)
+                    const max = await Men.find().sort({ price: -1 }).limit(1)
+                    return res.status(200).send({
+                        data: {
+                            min: min[0]?.price,
+                            max: max[0]?.price,
+                        }
+                    })
+                case 'Women':
+                    const minWP = await Women.find().sort({ price: 1 }).limit(1)
+                    const maxWP = await Women.find().sort({ price: -1 }).limit(1)
+                    return res.status(200).send({
+                        data: {
+                            min: minWP[0]?.price,
+                            max: maxWP[0]?.price,
+                        }
+                    })
+                case 'Kids':
+                    const minKidsP = await Kids.find().sort({ price: 1 }).limit(1)
+                    const maxKidsP = await Kids.find().sort({ price: -1 }).limit(1)
+                    return res.status(200).send({
+                        data: {
+                            min: minKidsP[0]?.price,
+                            max: maxKidsP[0]?.price,
+                        }
+                    })
+                case 'Kitchen':
+                    const minHP = await HomeKitchen.find().sort({ price: 1 }).limit(1)
+                    const maxHP = await HomeKitchen.find().sort({ price: -1 }).limit(1)
+                    return res.status(200).send({
+                        data: {
+                            min: minHP[0]?.price,
+                            max: maxHP[0]?.price,
+                        }
+                    })
+
+                default:
+                    break;
+            }
         } catch (error) {
             console.log(error)
             res.status(500).send({
@@ -178,34 +219,92 @@ const productCtrl = {
 
     getFilterProduct: async (req, res) => {
         try {
-            const { content, user } = req.query || {}
-            console.log(req.query)
-            console.log(new RegExp(content, 'i'))
+            const { content, user, sortedBy, maxPrice, size, page } = req.query || {}
+
             switch (user) {
                 case "Men":
-                    const result = await Men.find({ category: new RegExp(content, 'i') })
-                    console.log(result)
+
+                    productCount(Men, content, res)
+                    console.log('from count', count)
+                    const result = await Men.aggregate([
+                        {
+                            $match: {
+                                category: new RegExp(content, 'i'),
+                                $or: [{ price: { "$lte": maxPrice } }]
+                            },
+                        },
+                        { $sort: { price: +sortedBy } },
+                        { $skip: (+size) * (+page) },
+                        { $limit: +size }
+
+                    ])
+
+
                     return res.status(200).send({
-                        result
-                    })
-                case "Kids":
-                    const kidsResult = await Kids.find({ category: new RegExp(content, 'i') })
-                    return res.status(200).send({
-                        kidsResult
+                        result,
+                        count
                     })
 
-                case "Women":
-                    const womenResult = await Women.find({ category: new RegExp(content, 'i') })
+                case "Kids":
+                    productCount(Kids, content, res)
+                    const kidsResult = await Kids.aggregate([
+                        {
+                            $match: {
+                                category: new RegExp(content, 'i'),
+                                $or: [{ price: { "$lte": maxPrice } }]
+                            },
+                        },
+                        { $sort: { price: +sortedBy } },
+                        { $skip: (+size) * (+page) },
+                        { $limit: +size }
+
+                    ])
+
+
                     return res.status(200).send({
-                        result:womenResult
+                        kidsResult,
+                        count
+                    })
+                case "Women":
+                    productCount(Women, content, res)
+                    const womenResult = await Women.aggregate([
+                        {
+                            $match: {
+                                category: new RegExp(content, 'i'),
+                                $or: [{ price: { "$lte": maxPrice } }]
+                            },
+                        },
+                        { $sort: { price: +sortedBy } },
+                        { $skip: (+size) * (+page) },
+                        { $limit: +size }
+
+                    ])
+
+
+                    return res.status(200).send({
+                        womenResult,
+                        count
                     })
 
                 case "Home&Kitchen":
-                    const homeResult = await HomeKitchen.find({ category: new RegExp(content, 'i') })
-                    return res.status(200).send({
-                        homeResult
-                    })
+                    productCount(HomeKitchen, content, res)
+                    const homeResult = await Women.aggregate([
+                        {
+                            $match: {
+                                category: new RegExp(content, 'i'),
+                                $or: [{ price: { "$lte": maxPrice } }]
+                            },
+                        },
+                        { $sort: { price: +sortedBy } },
+                        { $skip: (+size) * (+page) },
+                        { $limit: +size }
 
+                    ])
+
+                    return res.status(200).send({
+                        homeResult,
+                        count
+                    })
 
                 default:
                     return res.send({
@@ -214,6 +313,50 @@ const productCtrl = {
             }
         } catch (error) {
             console.log(error)
+            res.status(500).send({
+                message: "Server Error"
+            })
+        }
+    },
+
+    getSingleProduct: async (req, res) => {
+        try {
+            const { id } = req.params || {}
+            console.log(id)
+            const result = await ProUser.aggregate([
+                { $match: { _id: ObjectId('635f629747530d8dbcd4ddfd') } },
+                {
+                    $project: {
+                        companyName: 1,
+                        email: 1,
+                        brand: 1,
+                        type: 1,
+                        category: 1,
+                        price: 1,
+                        Description: 1,
+                        userId: {"$toObjectId": "user_id"},
+                    }
+                },
+                {
+                    $lookup:{
+                        from:'users',
+                        localField:'userId',
+                        foreignField:'_id',
+                        as:'userDetails'
+                    }
+                }
+            ])
+
+            console.log(result)
+            res.status(200).send({
+                message: "success",
+                result
+            })
+            console.log(result)
+        } catch (error) {
+            res.status(500).send({
+                message: 'Internal server error'
+            })
         }
     },
 
@@ -228,7 +371,7 @@ const productCtrl = {
 
     searchProduct: async (req, res) => {
         try {
-            // console.log(req.params.key)
+
             const data = await ProUser.find(
                 {
                     "$or": [
