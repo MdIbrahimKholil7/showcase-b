@@ -52,6 +52,10 @@ const BusSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    userId: {
+        type: String,
+        required: true
+    },
     videoOwner: {
         type: mongoose.Schema.ObjectId,
         ref: 'Users',

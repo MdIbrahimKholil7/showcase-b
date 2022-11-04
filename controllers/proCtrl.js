@@ -55,7 +55,7 @@ class APIfeatures {
 
 // for posting video 
 const saveVideo = async (Collection, data, res) => {
-    const { link, companyName, email, productBrand, productType, category, price, description, userId, discount,videoOwner } = data?.data || {};
+    const { link, companyName, email, productBrand, productType, category, price, description, userId, discount, videoOwner } = data?.data || {};
     // console.log('data', data?.video)
     // console.log('from data',data)
     const newProduct = new Collection({
@@ -69,7 +69,7 @@ const saveVideo = async (Collection, data, res) => {
         Description: description,
         discount,
         userId: data?.userId,
-        videoOwner:data?.videoOwner
+        videoOwner: data?.videoOwner
     })
     const result = await newProduct.save()
 
@@ -84,9 +84,10 @@ const saveVideo = async (Collection, data, res) => {
         Description: description,
         discount,
         productId: result?._id,
-        videoOwner:data?.videoOwner
+        userId,
+        videoOwner: data?.videoOwner
     })
-   
+
     const itemResult = await newItem.save()
     console.log('result', result)
     res.json({ msg: "Created a product", result })
@@ -94,9 +95,14 @@ const saveVideo = async (Collection, data, res) => {
 
 
 
-const productCount = async (collection, content, res) => {
-    const results = collection.find({ category: new RegExp(content, 'i') })
-    count = await results.count()
+const productCount = async (collection, content,) => {
+    if (content) {
+        const results = collection.find({ category: new RegExp(content, 'i') })
+        count = await results.count()
+    } else {
+        const results = collection.find()
+        count = await results.count()
+    }
 
 }
 
@@ -125,9 +131,10 @@ const productCtrl = {
 
     getAdminVideo: async (req, res) => {
         try {
-            console.log('user',req.user.id)
-            console.log('user',req.body)
-            const result =await ProUser.find({ userId:"635bc4950e24691357b07630"})
+            console.log('user', req.user.id)
+
+
+            const result = await ProUser.find({ userId: req.user.id })
             res.status(200).send({
                 message: 'Success',
                 data: result
@@ -171,7 +178,7 @@ const productCtrl = {
 
         try {
             const { content } = req.query || {}
-
+            console.log(content)
             switch (content) {
 
                 case 'Men':
@@ -211,8 +218,23 @@ const productCtrl = {
                         }
                     })
 
+
+                case 'allVideo':
+                    const minP = await ProUser.find().sort({ price: 1 }).limit(1)
+                    const maxP = await ProUser.find().sort({ price: -1 }).limit(1)
+                    return res.status(200).send({
+                        data: {
+                            min: minP[0]?.price,
+                            max: maxP[0]?.price,
+                        }
+                    })
+
+
+
                 default:
-                    break;
+                    res.status(500).send({
+                        message: 'There is no price'
+                    });
             }
         } catch (error) {
             console.log(error)
@@ -230,7 +252,7 @@ const productCtrl = {
                 case "Men":
 
                     productCount(Men, content, res)
-                    console.log('from count', count)
+
                     const result = await Men.aggregate([
                         {
                             $match: {
@@ -242,7 +264,7 @@ const productCtrl = {
                         { $skip: (+size) * (+page) },
                         { $limit: +size }
                     ])
-
+                    console.log(result)
                     return res.status(200).send({
                         result,
                         count
@@ -263,9 +285,8 @@ const productCtrl = {
 
                     ])
 
-
                     return res.status(200).send({
-                        kidsResult,
+                        result: kidsResult,
                         count
                     })
                 case "Women":
@@ -285,7 +306,7 @@ const productCtrl = {
 
 
                     return res.status(200).send({
-                        womenResult,
+                        result: womenResult,
                         count
                     })
 
@@ -305,7 +326,26 @@ const productCtrl = {
                     ])
 
                     return res.status(200).send({
-                        homeResult,
+                        result: homeResult,
+                        count
+                    })
+                case "allVideo":
+                    console.log(size, page)
+                    productCount(ProUser)
+                    const allProduct = await ProUser.aggregate([
+                        {
+                            $sort: {
+                                'createdAt': -1
+                            },
+                        },
+                        { $sort: { price: +sortedBy } },
+                        { $skip: (+size) * (+page) },
+                        { $limit: +size }
+
+                    ])
+                    // console.log(allProduct)
+                    return res.status(200).send({
+                        result: allProduct,
                         count
                     })
 
@@ -326,32 +366,8 @@ const productCtrl = {
         try {
             const { id } = req.params || {}
             console.log(id)
-            // const result = await ProUser.aggregate([
-            //     { $match: { _id: ObjectId('635f629747530d8dbcd4ddfd') } },
-            //     {
-            //         $project: {
-            //             companyName: 1,
-            //             email: 1,
-            //             brand: 1,
-            //             type: 1,
-            //             category: 1,
-            //             price: 1,
-            //             Description: 1,
-            //             videoOwner:1,
-            //         }
-            //     },
-            //     {
-            //         $lookup:{
-            //             from:'users',
-            //             localField:'videoOwner',
-            //             foreignField:'_id',
-            //             as:'userDetails'
-            //         }
-            //     }
-            // ])
-
-            const result=await ProUser.find({userId:id}).populate('videoOwner')
-            console.log(result)
+            const result = await ProUser.find({ productId: id }).populate('videoOwner', 'latitude longitude country phone ')
+            console.log('single product', result)
             res.status(200).send({
                 message: "success",
                 result
