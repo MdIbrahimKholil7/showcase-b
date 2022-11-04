@@ -53,7 +53,8 @@ const homeKitchenSchema = new mongoose.Schema({
     },
     videoOwner: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'userSchema'
+        ref: 'Users',
+        required:true
     }
 
 }, {

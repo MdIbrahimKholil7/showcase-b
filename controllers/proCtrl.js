@@ -55,8 +55,9 @@ class APIfeatures {
 
 // for posting video 
 const saveVideo = async (Collection, data, res) => {
-    const { link, companyName, email, productBrand, productType, category, price, description, userId, discount } = data?.data || {};
-    console.log('data', data?.video)
+    const { link, companyName, email, productBrand, productType, category, price, description, userId, discount,videoOwner } = data?.data || {};
+    // console.log('data', data?.video)
+    // console.log('from data',data)
     const newProduct = new Collection({
         link: data?.video,
         companyName,
@@ -67,8 +68,11 @@ const saveVideo = async (Collection, data, res) => {
         price,
         Description: description,
         discount,
-        userId: data?.userId
+        userId: data?.userId,
+        videoOwner:data?.videoOwner
     })
+    const result = await newProduct.save()
+
     const newItem = new ProUser({
         link: data?.video,
         companyName,
@@ -79,10 +83,11 @@ const saveVideo = async (Collection, data, res) => {
         price,
         Description: description,
         discount,
-        userId: data?.userId
+        productId: result?._id,
+        videoOwner:data?.videoOwner
     })
+   
     const itemResult = await newItem.save()
-    const result = await newProduct.save()
     console.log('result', result)
     res.json({ msg: "Created a product", result })
 }
@@ -120,9 +125,9 @@ const productCtrl = {
 
     getAdminVideo: async (req, res) => {
         try {
-            const results = ProUser.find({ userId: req?.user?.id })
-            const result = await results
-            console.log('admin video', result)
+            console.log('user',req.user.id)
+            console.log('user',req.body)
+            const result =await ProUser.find({ userId:"635bc4950e24691357b07630"})
             res.status(200).send({
                 message: 'Success',
                 data: result
@@ -236,9 +241,7 @@ const productCtrl = {
                         { $sort: { price: +sortedBy } },
                         { $skip: (+size) * (+page) },
                         { $limit: +size }
-
                     ])
-
 
                     return res.status(200).send({
                         result,
@@ -323,30 +326,31 @@ const productCtrl = {
         try {
             const { id } = req.params || {}
             console.log(id)
-            const result = await ProUser.aggregate([
-                { $match: { _id: ObjectId('635f629747530d8dbcd4ddfd') } },
-                {
-                    $project: {
-                        companyName: 1,
-                        email: 1,
-                        brand: 1,
-                        type: 1,
-                        category: 1,
-                        price: 1,
-                        Description: 1,
-                        userId: {"$toObjectId": "user_id"},
-                    }
-                },
-                {
-                    $lookup:{
-                        from:'users',
-                        localField:'userId',
-                        foreignField:'_id',
-                        as:'userDetails'
-                    }
-                }
-            ])
+            // const result = await ProUser.aggregate([
+            //     { $match: { _id: ObjectId('635f629747530d8dbcd4ddfd') } },
+            //     {
+            //         $project: {
+            //             companyName: 1,
+            //             email: 1,
+            //             brand: 1,
+            //             type: 1,
+            //             category: 1,
+            //             price: 1,
+            //             Description: 1,
+            //             videoOwner:1,
+            //         }
+            //     },
+            //     {
+            //         $lookup:{
+            //             from:'users',
+            //             localField:'videoOwner',
+            //             foreignField:'_id',
+            //             as:'userDetails'
+            //         }
+            //     }
+            // ])
 
+            const result=await ProUser.find({userId:id}).populate('videoOwner')
             console.log(result)
             res.status(200).send({
                 message: "success",
@@ -354,6 +358,7 @@ const productCtrl = {
             })
             console.log(result)
         } catch (error) {
+            console.log(error)
             res.status(500).send({
                 message: 'Internal server error'
             })

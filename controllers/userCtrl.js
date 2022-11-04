@@ -376,12 +376,11 @@ const userCtrl = {
             console.log('from address ok', resp.data.data)
             const lat = resp.data.data[0].latitude;
             const lang = resp.data.data[0].longitude;
-            const country = resp.data.data[0].country;
+    
 
 
             const result = await Users.findOneAndUpdate({ _id: req.user.id }, {
                 address: req.body.address,
-                country: country,
                 latitude: lat,
                 longitude: lang,
             })

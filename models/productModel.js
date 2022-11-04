@@ -40,22 +40,22 @@ const BusSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    discount:{
-        type:Number
+    discount: {
+        type: Number
     },
     // vaw2-uBFtqoinN0rDnbXYR9GkPe-_T-xgqr10HXW
     Description: {
         type: String,
         required: true
     },
-    userId: {
+    productId: {
         type: String,
         required: true
     },
     videoOwner: {
         type: mongoose.Schema.ObjectId,
-        ref: 'userModel',
-        // required:true
+        ref: 'Users',
+        required: true
     }
 }, {
     timestamps: true
