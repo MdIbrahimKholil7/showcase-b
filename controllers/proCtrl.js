@@ -4,7 +4,8 @@ const Women = require('../models/womenProModel')
 const Kids = require('../models/kidsProModel')
 const Men = require('../models/menProModel')
 const HomeKitchen = require('../models/home-kitchenProModel')
-const { ObjectId } = require('mongodb')
+const Users = require('../models/userModel')
+const { ObjectId } = require('mongodb');
 // Filter, sorting and paginatin
 let count;
 
@@ -365,14 +366,14 @@ const productCtrl = {
     getSingleProduct: async (req, res) => {
         try {
             const { id } = req.params || {}
-            console.log(id)
+            
             const result = await ProUser.find({ productId: id }).populate('videoOwner', 'latitude longitude country phone ')
-            console.log('single product', result)
+         
             res.status(200).send({
                 message: "success",
                 result
             })
-            console.log(result)
+           
         } catch (error) {
             console.log(error)
             res.status(500).send({
@@ -389,7 +390,31 @@ const productCtrl = {
             return res.status(500).json({ msg: err.message })
         }
     },
-
+    savedVideo: async (req, res) => {
+        try {
+            const { productId, userId } = req.query || {}
+            console.log(typeof req.query.userId)
+            const result = await ProUser.find({productId})
+            console.log('from result',result[0])
+            const arrayResult = result[0]?.saved?.includes(userId)
+            console.log(arrayResult)
+            if (!arrayResult) {
+                const update = await ProUser.findOneAndUpdate({productId}, { $push: {"saved":userId} })
+                await Users.findByIdAndUpdate({_id:userId}, { $push: {"saveVideo":productId} })
+                // console.log('from update',update)
+                res.send({
+                    message: "Success"
+                })
+            } else {
+                res.send({
+                    message: "User already present",
+                    update: true
+                })
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    },
     searchProduct: async (req, res) => {
         try {
 

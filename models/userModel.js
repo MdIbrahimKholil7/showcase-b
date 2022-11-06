@@ -53,6 +53,7 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    saveVideo:Array,
     country: {
       type: String,
       default: "",

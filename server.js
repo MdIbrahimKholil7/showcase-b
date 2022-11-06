@@ -128,6 +128,10 @@ app.delete("/user/delete/:id", (req, res) => {
     });
 });
 
+// VAc1d49a86344c8030862d004ff0affe15
+// AC11b5368f27f2a8e8c14b6c751e508842
+// fb2e83bc45fb7bdb5dc3567c896934b8
+
 app.patch("/updatePass", async(req, res) => {
   let { newpass, email } = req.body;
   newpass=await bcrypt.hash(newpass,10);

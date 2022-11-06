@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken')
 const client = require("twilio")(process.env.acountSID, process.env.authToken)
 const axios = require('axios');
 const { findOneAndUpdate } = require('../models/userModel');
-
+const ProUser = require('../models/productModel')
 
 const userCtrl = {
 
@@ -64,7 +64,7 @@ const userCtrl = {
                 /* signed: true,
                 secure: true,
                 sameSite:'none', */
-                
+
             })
 
             res.json({ accesstoken })
@@ -77,24 +77,17 @@ const userCtrl = {
     },
 
 
-    validation: async (req,res) => {
+    validation: async (req, res) => {
         try {
-            console.log('from validation',req.user)
-            if(req.user.id){
+            console.log('from validation', req.user)
+            if (req.user.id) {
                 res.status(200).json({
-                    message:'Success'
+                    message: 'Success'
                 })
             }
         } catch (error) {
-            
-            console.log(error)
-        }
-    },
-    getUser: async (req, res) => {
-        try {
-            console.log('from get user', req.user)
-        } catch (error) {
 
+            console.log(error)
         }
     },
     deleteUser: async (req, res) => {
@@ -227,9 +220,20 @@ const userCtrl = {
 
     },
     getUser: async (req, res) => {
+        let product = []
         try {
             const user = await Users.findById(req.user.id).select('-password')
             if (!user) return res.status(400).json({ msg: "User does not exist." })
+            // Promise.all(product)
+            //     .then(res => console.log('res', res))
+            console.log('product', product)
+            user?.saveVideo.forEach(id => {
+                const data = ProUser.findById(id)
+                product.push(data)
+                // console.log('data',data)
+            })
+            Promise.all(product)
+                .then(res => console.log('res',res))
             res.json(user)
         } catch (err) {
             return res.status(500).json({ msg: 'Invalid' })
@@ -376,7 +380,7 @@ const userCtrl = {
             console.log('from address ok', resp.data.data)
             const lat = resp.data.data[0].latitude;
             const lang = resp.data.data[0].longitude;
-    
+
 
 
             const result = await Users.findOneAndUpdate({ _id: req.user.id }, {
@@ -402,7 +406,7 @@ const userCtrl = {
             const user = await Users.findById(req.user.id)
             if (!user) return res.status(400).json({ msg: "User does not exist." })
 
-           const result= await Users.findOneAndUpdate({ _id: req.user.id }, {
+            const result = await Users.findOneAndUpdate({ _id: req.user.id }, {
                 name: req.body.name,
                 phone: req.body.phone,
                 about: req.body.about,
@@ -411,7 +415,7 @@ const userCtrl = {
 
             })
             console.log(req.body)
-            console.log('from edit',result)
+            console.log('from edit', result)
             return res.json({ msg: "Completed" })
 
 

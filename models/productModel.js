@@ -52,6 +52,10 @@ const BusSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    saved: {
+        type: Array,
+        default: []
+    },
     userId: {
         type: String,
         required: true
@@ -61,8 +65,10 @@ const BusSchema = new mongoose.Schema({
         ref: 'Users',
         required: true
     }
-}, {
-    timestamps: true
-})
+},
+    {
+        timestamps: true
+    }
+)
 
 module.exports = mongoose.model('ProUser', BusSchema)
