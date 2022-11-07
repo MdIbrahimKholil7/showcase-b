@@ -53,7 +53,13 @@ const userSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    saveVideo:Array,
+    saveVideo: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'ProUser',
+        required: true
+      }
+    ],
     country: {
       type: String,
       default: "",
@@ -65,7 +71,7 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Users", userSchema,'users');
+module.exports = mongoose.model("Users", userSchema);
 
 
 

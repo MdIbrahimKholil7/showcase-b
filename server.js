@@ -149,12 +149,12 @@ app.patch("/updatePass", async(req, res) => {
 // otp send api here
 app.post("/onetimepassword", (req, res) => {
   let { country, phone } = req.body;
-  console.log(req.body)
+
   client.verify
     .services(process.env.serviceID)
     .verifications.create({ to: `+${country}${phone}`, channel: "sms" })
     .then((verification) => {
-      console.log(verification);
+    
       res.json({ message: "OTP sent successfully" });
     })
     .catch((err) => {
@@ -173,7 +173,7 @@ authToken = 0fa2f3bb7636e7cbcf3d98bdc528f730 */
 // otp check api 
 app.post("/otpcheck", (req, res) => {
   let { otp, country, phone } = req.body;
-  console.log(req.body)
+
   client.verify
     .services(process.env.serviceID)
     .verificationChecks.create({ to: `+${country}${phone}`, code: otp })

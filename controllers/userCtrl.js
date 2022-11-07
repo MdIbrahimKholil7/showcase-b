@@ -6,7 +6,7 @@ const client = require("twilio")(process.env.acountSID, process.env.authToken)
 const axios = require('axios');
 const { findOneAndUpdate } = require('../models/userModel');
 const ProUser = require('../models/productModel')
-
+const { ObjectId } = require('mongodb');
 const userCtrl = {
 
     register: async (req, res) => {
@@ -222,20 +222,48 @@ const userCtrl = {
     getUser: async (req, res) => {
         let product = []
         try {
-            const user = await Users.findById(req.user.id).select('-password')
+            let user = await Users.findById(req.user.id).select('-password')/* .populate({
+                path: 'saveVideo',
+                model: 'ProUser',
+              }) */
+            // const user = await Users.aggregate([
+            //     {
+            //         $match: { _id: ObjectId(req.user.id) }
+            //     },
+            //     {
+            //         $project: {
+            //             _id: 1,
+            //             name: 1,
+            //             email: 1,
+            //             phone: 1,
+            //             address: 1,
+            //             about: 1,
+            //             whats: 1,
+            //             latitude: 1,
+            //             longitude: 1,
+            //             profile: 1,
+            //             role: 1,
+            //             saveVideo: 1,
+            //             country: 1
+            //         }
+            //     },
+            //     {
+            //         $lookup: {
+            //             from: 'ProUser', // users collection name
+            //             localField: 'saveVideo',
+            //             foreignField: '_id',
+            //             as: 'saveVideo'
+
+            //         }
+            //     }
+            // ])
             if (!user) return res.status(400).json({ msg: "User does not exist." })
             // Promise.all(product)
             //     .then(res => console.log('res', res))
-            console.log('product', product)
-            user?.saveVideo.forEach(id => {
-                const data = ProUser.findById(id)
-                product.push(data)
-                // console.log('data',data)
-            })
-            Promise.all(product)
-                .then(res => console.log('res',res))
+            console.log('get user', user)
             res.json(user)
         } catch (err) {
+            console.log(err)
             return res.status(500).json({ msg: 'Invalid' })
         }
     },

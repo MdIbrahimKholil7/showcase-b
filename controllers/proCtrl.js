@@ -390,12 +390,13 @@ const productCtrl = {
             return res.status(500).json({ msg: err.message })
         }
     },
+
     savedVideo: async (req, res) => {
         try {
             const { productId, userId } = req.query || {}
-            console.log(typeof req.query.userId)
+            console.log(req.query.userId)
             const result = await ProUser.find({productId})
-            console.log('from result',result[0])
+            // console.log('from result',result[0])
             const arrayResult = result[0]?.saved?.includes(userId)
             console.log(arrayResult)
             if (!arrayResult) {
