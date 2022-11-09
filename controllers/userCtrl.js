@@ -219,13 +219,14 @@ const userCtrl = {
         }
 
     },
+
     getUser: async (req, res) => {
         let product = []
         try {
-            let user = await Users.findById(req.user.id).select('-password')/* .populate({
-                path: 'saveVideo',
-                model: 'ProUser',
-              }) */
+
+
+            let user = await Users.findById(req.user.id).select('-password').populate('saveVideo')
+
             // const user = await Users.aggregate([
             //     {
             //         $match: { _id: ObjectId(req.user.id) }

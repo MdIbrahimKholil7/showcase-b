@@ -55,7 +55,7 @@ const userSchema = new mongoose.Schema(
     },
     saveVideo: [
       {
-        type: mongoose.Schema.ObjectId,
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'ProUser',
         required: true
       }
