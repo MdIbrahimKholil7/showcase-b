@@ -366,14 +366,14 @@ const productCtrl = {
     getSingleProduct: async (req, res) => {
         try {
             const { id } = req.params || {}
-            
-            const result = await ProUser.find({ productId: id }).populate('videoOwner', 'latitude longitude country phone ')
-         
+
+            const result = await ProUser.find({ _id: id }).populate('videoOwner', 'latitude longitude country phone ')
+
             res.status(200).send({
                 message: "success",
                 result
             })
-           
+
         } catch (error) {
             console.log(error)
             res.status(500).send({
@@ -393,24 +393,26 @@ const productCtrl = {
 
     savedVideo: async (req, res) => {
         try {
+
             const { productId, userId } = req.query || {}
-            console.log(req.query.userId)
-            const result = await ProUser.find({productId})
-            // console.log('from result',result[0])
+            const result = await ProUser.find({ _id: productId })
             const arrayResult = result[0]?.saved?.includes(userId)
-            console.log(arrayResult)
+
             if (!arrayResult) {
-                const update = await ProUser.findOneAndUpdate({productId}, { $push: {"saved":userId} })
-                await Users.findByIdAndUpdate({_id:userId}, { $push: {"saveVideo":productId} })
-                // console.log('from update',update)
+
+                await ProUser.findOneAndUpdate({ _id: productId }, { $push: { "saved": userId } })
+                await Users.findByIdAndUpdate({ _id: userId }, { $push: { "saveVideo": productId } })
                 res.send({
                     message: "Success"
                 })
+
             } else {
+
                 res.send({
                     message: "User already present",
                     update: true
                 })
+                
             }
         } catch (error) {
             console.log(error)

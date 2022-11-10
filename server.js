@@ -26,24 +26,7 @@ const s3 = new aws.S3({
 app.use(express.json());
 app.use(cookieParser(process.env.ACCESS_TOKEN_SECRET));
 app.use(cors())
-/* app.use(cors({
-  origin:[
-    'http://localhost:3000',
-    'http://3.110.108.123:5000',
-    'http://3.110.108.123:3000/',
-    'https://api.showcaseurbusiness.com/',
-    'http://www.showcaseurbusiness.com/',
-    'https://www.showcaseurbusiness.com/',
-    'http://3.110.108.123/'
-  ],
-  credentials:true,
-  optionSuccessStatus:200
-})); */
-// cors 
-/* app.use((req, res, next) => {
-  res.header({"Access-Control-Allow-Origin": "*"});
-  next();
-})  */
+
 app.use(fileUpload({ useTempFiles: true }));
 app.post('s3Url',async(req,res)=>{
    const videoname=req.body.fn;
@@ -128,9 +111,7 @@ app.delete("/user/delete/:id", (req, res) => {
     });
 });
 
-// VAc1d49a86344c8030862d004ff0affe15
-// AC11b5368f27f2a8e8c14b6c751e508842
-// fb2e83bc45fb7bdb5dc3567c896934b8
+
 
 app.patch("/updatePass", async(req, res) => {
   let { newpass, email } = req.body;

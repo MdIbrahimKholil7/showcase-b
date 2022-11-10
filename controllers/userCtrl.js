@@ -221,47 +221,13 @@ const userCtrl = {
     },
 
     getUser: async (req, res) => {
-        let product = []
+    
         try {
 
-
             let user = await Users.findById(req.user.id).select('-password').populate('saveVideo')
-
-            // const user = await Users.aggregate([
-            //     {
-            //         $match: { _id: ObjectId(req.user.id) }
-            //     },
-            //     {
-            //         $project: {
-            //             _id: 1,
-            //             name: 1,
-            //             email: 1,
-            //             phone: 1,
-            //             address: 1,
-            //             about: 1,
-            //             whats: 1,
-            //             latitude: 1,
-            //             longitude: 1,
-            //             profile: 1,
-            //             role: 1,
-            //             saveVideo: 1,
-            //             country: 1
-            //         }
-            //     },
-            //     {
-            //         $lookup: {
-            //             from: 'ProUser', // users collection name
-            //             localField: 'saveVideo',
-            //             foreignField: '_id',
-            //             as: 'saveVideo'
-
-            //         }
-            //     }
-            // ])
             if (!user) return res.status(400).json({ msg: "User does not exist." })
-            // Promise.all(product)
-            //     .then(res => console.log('res', res))
-            console.log('get user', user)
+            
+            // console.log('get user', user)
             res.json(user)
         } catch (err) {
             console.log(err)
