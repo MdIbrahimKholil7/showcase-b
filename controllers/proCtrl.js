@@ -98,7 +98,12 @@ const saveVideo = async (Collection, data, res) => {
 
 const productCount = async (collection, content,) => {
     if (content) {
-        const results = collection.find({ category: new RegExp(content, 'i') })
+        const results = collection.find({
+            $or: [
+                { category: new RegExp(content, 'i') },
+                { type: new RegExp(content, 'i') },
+            ]
+        })
         count = await results.count()
     } else {
         const results = collection.find()
@@ -185,7 +190,7 @@ const productCtrl = {
                 case 'Men':
                     const min = await Men.find().sort({ price: 1 }).limit(1)
                     const max = await Men.find().sort({ price: -1 }).limit(1)
-                    console.log(min,max)
+                    console.log(min, max)
                     return res.status(200).send({
                         data: {
                             min: min[0]?.price,
@@ -232,6 +237,31 @@ const productCtrl = {
                     })
 
 
+                case 'input':
+                    const minSearchP = await ProUser.find({
+                        $or: [
+                            { category: new RegExp(content, 'i') },
+                            { type: new RegExp(content, 'i') },
+                            { brand: new RegExp(content, 'i') },
+
+                        ]
+                    }).sort({ price: 1 }).limit(1)
+                    const maxSearchP = await ProUser.find({
+                        $or: [
+                            { category: new RegExp(content, 'i') },
+                            { type: new RegExp(content, 'i') },
+                            { brand: new RegExp(content, 'i') },
+                        ]
+                    }).sort({ price: -1 }).limit(1)
+
+                    return res.status(200).send({
+                        data: {
+                            min: minSearchP[0]?.price,
+                            max: maxSearchP[0]?.price,
+                        }
+                    })
+
+
 
                 default:
                     res.status(500).send({
@@ -251,6 +281,7 @@ const productCtrl = {
             const { content, user, sortedBy, maxPrice, size, page } = req.query || {}
             console.log('query', req.query)
             switch (user) {
+
                 case "Men":
 
                     productCount(Men, content, res)
@@ -296,6 +327,7 @@ const productCtrl = {
                         result: kidsResult,
                         count
                     })
+
                 case "Women":
                     productCount(Women, content, res)
                     const womenResult = await Women.aggregate([
@@ -312,7 +344,6 @@ const productCtrl = {
                         { $limit: +size }
 
                     ])
-
 
                     return res.status(200).send({
                         result: womenResult,
@@ -340,6 +371,7 @@ const productCtrl = {
                         result: homeResult,
                         count
                     })
+
                 case "allVideo":
 
                     productCount(ProUser)
@@ -364,6 +396,40 @@ const productCtrl = {
                     // console.log(allProduct)
                     return res.status(200).send({
                         result: allProduct,
+                        count
+                    })
+                case "input":
+
+                    productCount(ProUser)
+                    const searchProduct = await ProUser.aggregate([
+                        {
+                            $match: {
+                                $and: [
+                                    { price: { "$lte": maxPrice } },
+                                ],
+                                $or: [
+                                    { category: new RegExp(content, 'i') },
+                                    { type: new RegExp(content, 'i') },
+                                    { brand: new RegExp(content, 'i') },
+
+                                ]
+                            },
+                        },
+                        {
+                            $sort: {
+                                'createdAt': -1
+                            },
+
+                        },
+                        { $sort: { price: +sortedBy } },
+                        { $skip: (+size) * (+page) },
+                        { $limit: +size },
+
+                    ])
+
+                    console.log(searchProduct)
+                    return res.status(200).send({
+                        result: searchProduct,
                         count
                     })
 
