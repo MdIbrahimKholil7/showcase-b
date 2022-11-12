@@ -80,9 +80,11 @@ const userCtrl = {
     validation: async (req, res) => {
         try {
             console.log('from validation', req.user)
+            const result=await Users.findById(req?.user?.id)
             if (req.user.id) {
                 res.status(200).json({
-                    message: 'Success'
+                    message: 'Success',
+                    data:result
                 })
             }
         } catch (error) {

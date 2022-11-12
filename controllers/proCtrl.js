@@ -185,6 +185,7 @@ const productCtrl = {
                 case 'Men':
                     const min = await Men.find().sort({ price: 1 }).limit(1)
                     const max = await Men.find().sort({ price: -1 }).limit(1)
+                    console.log(min,max)
                     return res.status(200).send({
                         data: {
                             min: min[0]?.price,
@@ -248,7 +249,7 @@ const productCtrl = {
     getFilterProduct: async (req, res) => {
         try {
             const { content, user, sortedBy, maxPrice, size, page } = req.query || {}
-
+            console.log('query', req.query)
             switch (user) {
                 case "Men":
 
@@ -257,15 +258,18 @@ const productCtrl = {
                     const result = await Men.aggregate([
                         {
                             $match: {
-                                category: new RegExp(content, 'i'),
-                                $or: [{ price: { "$lte": maxPrice } }]
+                                $and: [
+                                    { price: { "$lte": maxPrice } },
+                                    { category: new RegExp(content, 'i') }
+                                ]
                             },
                         },
                         { $sort: { price: +sortedBy } },
                         { $skip: (+size) * (+page) },
                         { $limit: +size }
                     ])
-                    console.log(result)
+                    console.log('result', result)
+                    // console.log(count)
                     return res.status(200).send({
                         result,
                         count
@@ -276,8 +280,10 @@ const productCtrl = {
                     const kidsResult = await Kids.aggregate([
                         {
                             $match: {
-                                category: new RegExp(content, 'i'),
-                                $or: [{ price: { "$lte": maxPrice } }]
+                                $and: [
+                                    { price: { "$lte": maxPrice } },
+                                    { category: new RegExp(content, 'i') }
+                                ]
                             },
                         },
                         { $sort: { price: +sortedBy } },
@@ -295,8 +301,10 @@ const productCtrl = {
                     const womenResult = await Women.aggregate([
                         {
                             $match: {
-                                category: new RegExp(content, 'i'),
-                                $or: [{ price: { "$lte": maxPrice } }]
+                                $and: [
+                                    { price: { "$lte": maxPrice } },
+                                    { category: new RegExp(content, 'i') }
+                                ]
                             },
                         },
                         { $sort: { price: +sortedBy } },
@@ -316,8 +324,10 @@ const productCtrl = {
                     const homeResult = await Women.aggregate([
                         {
                             $match: {
-                                category: new RegExp(content, 'i'),
-                                $or: [{ price: { "$lte": maxPrice } }]
+                                $and: [
+                                    { price: { "$lte": maxPrice } },
+                                    { category: new RegExp(content, 'i') }
+                                ]
                             },
                         },
                         { $sort: { price: +sortedBy } },
@@ -331,17 +341,24 @@ const productCtrl = {
                         count
                     })
                 case "allVideo":
-                    console.log(size, page)
+
                     productCount(ProUser)
                     const allProduct = await ProUser.aggregate([
+                        {
+                            $match: {
+                                price: { $lte: maxPrice }
+                            }
+                        },
                         {
                             $sort: {
                                 'createdAt': -1
                             },
+
                         },
                         { $sort: { price: +sortedBy } },
                         { $skip: (+size) * (+page) },
-                        { $limit: +size }
+                        { $limit: +size },
+
 
                     ])
                     // console.log(allProduct)
@@ -412,7 +429,7 @@ const productCtrl = {
                     message: "User already present",
                     update: true
                 })
-                
+
             }
         } catch (error) {
             console.log(error)
