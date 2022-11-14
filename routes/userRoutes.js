@@ -38,7 +38,7 @@ router.patch('/editpro',auth, userCtrl.editprofile)
 router.patch('/addcart', auth, userCtrl.addSaved)
 
 router.get('/location', auth, userCtrl.Locations)
-
+router.delete('/delete-user',auth,userCtrl.deleteUser)
 
 // router.post('/videopost',auth,authAdmin,user)
 

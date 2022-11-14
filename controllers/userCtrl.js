@@ -80,11 +80,11 @@ const userCtrl = {
     validation: async (req, res) => {
         try {
             console.log('from validation', req.user)
-            const result=await Users.findById(req?.user?.id)
+            const result = await Users.findById(req?.user?.id)
             if (req.user.id) {
                 res.status(200).json({
                     message: 'Success',
-                    data:result
+                    data: result
                 })
             }
         } catch (error) {
@@ -223,12 +223,12 @@ const userCtrl = {
     },
 
     getUser: async (req, res) => {
-    
+
         try {
 
             let user = await Users.findById(req.user.id).select('-password').populate('saveVideo')
             if (!user) return res.status(400).json({ msg: "User does not exist." })
-            
+
             // console.log('get user', user)
             res.json(user)
         } catch (err) {
@@ -420,9 +420,20 @@ const userCtrl = {
             return res.status(500).json({ msg: err.message })
         }
     },
-
-
-
+    deleteUser: async (req, res) => {
+        try {
+            const result=await Users.findByIdAndDelete(req.user.id)
+     
+            if(result?._id){
+                res.status(200).send({
+                    data:result,
+                    status:true
+                })
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    },
 
     addSaved: async (req, res) => {
         try {

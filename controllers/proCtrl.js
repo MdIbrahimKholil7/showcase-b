@@ -150,6 +150,7 @@ const productCtrl = {
         }
     },
 
+    // create product 
     createProduct: async (req, res) => {
         try {
             const { link, companyName, email, productBrand, productType, category, price, Description, latitude, longitude, } = req.body.data || {};
@@ -180,17 +181,18 @@ const productCtrl = {
         }
     },
 
+    // filter min max price
     getMinPrice: async (req, res) => {
 
         try {
-            const { content } = req.query || {}
-            console.log(content)
+            const { content,inputSearch } = req.query || {}
+            console.log('min price',req.query)
             switch (content) {
 
                 case 'Men':
-                    const min = await Men.find().sort({ price: 1 }).limit(1)
-                    const max = await Men.find().sort({ price: -1 }).limit(1)
-                    console.log(min, max)
+                    const min = await Men.find().sort({ price: -1 }).limit(1)
+                    const max = await Men.find().sort({ price: 1 }).limit(1)
+            
                     return res.status(200).send({
                         data: {
                             min: min[0]?.price,
@@ -215,7 +217,7 @@ const productCtrl = {
                             max: maxKidsP[0]?.price,
                         }
                     })
-                case 'Kitchen':
+                case 'Home':
                     const minHP = await HomeKitchen.find().sort({ price: 1 }).limit(1)
                     const maxHP = await HomeKitchen.find().sort({ price: -1 }).limit(1)
                     return res.status(200).send({
@@ -240,20 +242,20 @@ const productCtrl = {
                 case 'input':
                     const minSearchP = await ProUser.find({
                         $or: [
-                            { category: new RegExp(content, 'i') },
-                            { type: new RegExp(content, 'i') },
-                            { brand: new RegExp(content, 'i') },
+                            { category: new RegExp(inputSearch, 'i') },
+                            { type: new RegExp(inputSearch, 'i') },
+                            { brand: new RegExp(inputSearch, 'i') },
 
                         ]
                     }).sort({ price: 1 }).limit(1)
                     const maxSearchP = await ProUser.find({
                         $or: [
-                            { category: new RegExp(content, 'i') },
-                            { type: new RegExp(content, 'i') },
-                            { brand: new RegExp(content, 'i') },
+                            { category: new RegExp(inputSearch, 'i') },
+                            { type: new RegExp(inputSearch, 'i') },
+                            { brand: new RegExp(inputSearch, 'i') },
                         ]
                     }).sort({ price: -1 }).limit(1)
-
+                    console.log(minSearchP,maxSearchP)
                     return res.status(200).send({
                         data: {
                             min: minSearchP[0]?.price,
@@ -276,6 +278,7 @@ const productCtrl = {
         }
     },
 
+    // filter function 
     getFilterProduct: async (req, res) => {
         try {
             const { content, user, sortedBy, maxPrice, size, page } = req.query || {}
@@ -283,7 +286,7 @@ const productCtrl = {
             switch (user) {
 
                 case "Men":
-
+                    // product count function 
                     productCount(Men, content, res)
 
                     const result = await Men.aggregate([
@@ -299,8 +302,8 @@ const productCtrl = {
                         { $skip: (+size) * (+page) },
                         { $limit: +size }
                     ])
-                    console.log('result', result)
-                    // console.log(count)
+                 
+                    console.log('men result',result)
                     return res.status(200).send({
                         result,
                         count
@@ -350,14 +353,14 @@ const productCtrl = {
                         count
                     })
 
-                case "Home&Kitchen":
+                case "Home":
                     productCount(HomeKitchen, content, res)
-                    const homeResult = await Women.aggregate([
+                    const homeResult = await HomeKitchen.aggregate([
                         {
                             $match: {
                                 $and: [
                                     { price: { "$lte": maxPrice } },
-                                    { category: new RegExp(content, 'i') }
+                                    { category: new RegExp(content, 'i','//' ) }
                                 ]
                             },
                         },
@@ -427,7 +430,7 @@ const productCtrl = {
 
                     ])
 
-                    console.log(searchProduct)
+                    // console.log('search result',searchProduct)
                     return res.status(200).send({
                         result: searchProduct,
                         count
@@ -464,7 +467,14 @@ const productCtrl = {
             })
         }
     },
-
+    getLatestVideo:async(req,res)=>{
+        try {
+            const result=await ProUser.find().sort({createdAt:-1}).limit(10)
+            res.send({data:result})
+        } catch (error) {
+            console.log(error)
+        }
+    },
     deleteProduct: async (req, res) => {
         try {
             await ProUser.findByIdAndDelete(req.params.id)
@@ -517,7 +527,22 @@ const productCtrl = {
             return res.status(500).json({ msg: err.message })
         }
     },
+    bestSellerVideo: async (req, res) => {
+        try {
+         
+            const result=await ProUser.aggregate( [
+                { $addFields: { total: { $size: "$saved" } } },
+                { $sort: { total: -1 } },
+                { $limit: 2 }
+             ] )
 
+            res.status(200).send({
+                data: result
+            })
+        } catch (error) {
+            console.log(error)
+        }
+    },
     updateProduct: async (req, res) => {
         try {
             const { link, brand, type, category, price, Description } = req.body;

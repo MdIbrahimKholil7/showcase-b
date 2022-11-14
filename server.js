@@ -10,7 +10,9 @@ const bcrypt = require("bcrypt");
 const User = require("./models/userModel");
 const client = require("twilio")(process.env.acountSID, process.env.authToken);
 const app = express();
-const paymentRoute=require('./routes/paymentRoute.js')
+// const paymentRoute=require('./routes/paymentRoute.js')
+const paymentRoute=require('./routes/paymentroutes.js')
+const reviewRoute=require('./routes/reviewRoute')
 // AWS.config.update({
 //   accessKeyId: "AKIAR3UTLLOPFFCEOVXL",
 //   secretAccessKey: "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",
@@ -42,7 +44,7 @@ app.post('s3Url',async(req,res)=>{
 })
 
 // payment route 
-app.use('/api/v1/payment',paymentRoute)
+app.use('/api/payment',paymentRoute)
 
 app.post("/user/saved", async (req, res) => {
   let { videoId, VideoLink, productId,latitude,longitude } = req.body;
@@ -197,9 +199,17 @@ app.post("/exist", (req, res) => {
       res.json({ message: "Something went wrong" });
     });
 });
+
+
+
+
 app.use("/user", require("./routes/userRoutes"));
 
 app.use("/admin", require("./routes/proRoutes"));
+
+app.use('/review', reviewRoute)
+
+
 
 // Connect to mongodb
 
