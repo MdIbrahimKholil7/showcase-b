@@ -79,9 +79,9 @@ const userCtrl = {
 
     validation: async (req, res) => {
         try {
-           
+            console.log('user',req?.user)
             const result = await Users.findById(req?.user?.id)
-            if (req.user.id) {
+            if (req?.user?.id) {
                 res.status(200).json({
                     message: 'Success',
                     data: result
