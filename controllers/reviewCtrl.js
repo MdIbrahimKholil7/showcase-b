@@ -16,7 +16,7 @@ const reviewCtrl = {
 
             const result = await reviewCreate.save()
             if (result._id) {
-                console.log(result)
+               
                 res.status(200).json({
                     message: 'Success',
                     data: result

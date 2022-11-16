@@ -11,9 +11,9 @@ router.route('/products')
 router.route('/products/:id')
     .delete(auth, authAdmin, productCtrl.deleteProduct)
     .patch(auth, authAdmin, productCtrl.updateProduct)
-router.post('/save', productCtrl.savedVideo)
+router.post('/save',auth, productCtrl.savedVideo)
 // get single product 
-router.get('/get-single-product/:id', auth, productCtrl.getSingleProduct)
+router.get('/get-single-product/:id', productCtrl.getSingleProduct)
 
 router.route('/adminProductVideo')
     .get(auth, authAdmin, productCtrl.getAdminVideo)

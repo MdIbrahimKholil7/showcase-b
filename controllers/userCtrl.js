@@ -57,7 +57,7 @@ const userCtrl = {
             // Then create jsonwebtoken to authentication
             const accesstoken = createAccessToken({ id: newUser._id })
             const refreshtoken = createRefreshToken({ id: newUser._id })
-            console.log(newUser)
+           
             res.cookie('token', accesstoken, {
                 maxAge: 7 * 24 * 60 * 60 * 1000,// 7d
                 httpOnly: true,
@@ -79,7 +79,7 @@ const userCtrl = {
 
     validation: async (req, res) => {
         try {
-            console.log('from validation', req.user)
+           
             const result = await Users.findById(req?.user?.id)
             if (req.user.id) {
                 res.status(200).json({
@@ -103,7 +103,7 @@ const userCtrl = {
 
 
     login: async (req, res, next) => {
-        console.log(req.body, 'from login')
+     
         try {
             let userrole;
             let user;
@@ -136,7 +136,7 @@ const userCtrl = {
                 accesstoken = createAccessToken({ id: user._id })
                 refreshtoken = createRefreshToken({ id: user._id })
                 userrole = await Users.findById(user._id).select('role')
-                console.log(userrole)
+               
             }
 
 
@@ -178,8 +178,7 @@ const userCtrl = {
                     // Password Encryption
                     const passwordHash = await bcrypt.hash(newPassword, 10)
                     const result = await Users.findOneAndUpdate({ email: user.email }, { password: passwordHash })
-                    console.log(passwordHash)
-                    console.log('from update pass', result)
+                   
                     if (result) {
                         res.status(200).send({
                             message: 'Success',
@@ -229,7 +228,7 @@ const userCtrl = {
             let user = await Users.findById(req.user.id).select('-password').populate('saveVideo')
             if (!user) return res.status(400).json({ msg: "User does not exist." })
 
-            // console.log('get user', user)
+            
             res.json(user)
         } catch (err) {
             console.log(err)
@@ -239,10 +238,10 @@ const userCtrl = {
     getImage: async (req, res) => {
         try {
             const user = await Users.findById(req.user.id).select('profile name about whats phone')
-            console.log('user', user)
+          
             if (!user) return res.status(400).json({ msg: "User does not exist." })
             res.json(user)
-            console.log("dff")
+           
         } catch (err) {
             return res.status(500).json({ msg: 'Invalid' })
         }
@@ -250,10 +249,10 @@ const userCtrl = {
 
     getOTP: async (req, res) => {
         try {
-            console.log(req.user)
+        
             const user = await Users.findById(req.user.id).select('phone')
             if (!user) return res.status(400).json({ msg: "User does not exist." })
-            console.log(user.phone)
+          
             if (user.phone) {
                 client
                     .verify
@@ -289,7 +288,7 @@ const userCtrl = {
 
     About: async (req, res) => {
         try {
-            console.log(req.user._id)
+          
             const user = await Users.findById(req.user.id)
             if (!user) return res.status(400).json({ msg: "User does not exist." })
 
@@ -298,7 +297,7 @@ const userCtrl = {
                 profile: req.body.profile,
                 name: req.body.name
             })
-            console.log("cdcc")
+            
             return res.json({ msg: "Done Bro" })
 
         } catch (err) {
@@ -320,8 +319,7 @@ const userCtrl = {
     complete: async (req, res) => {
         try {
             const user = await Users.findById(req.user.id)
-            console.log(user, 'complete')
-            console.log(req.user.id, 'complete')
+          
             if (!user) return res.status(400).json({ msg: "User does not exist." })
 
             const params = {
@@ -329,17 +327,16 @@ const userCtrl = {
                 query: req.body.address
             }
 
-            //   axios.get('http://api.positionstack.com/v1/forward', {params})
-            //     .then(response => {
-            //       console.log(response.data);
-            //     }).catch(error => {
-            //       console.log(error);
-            //     });
 
             const resp = await axios.get('http://api.positionstack.com/v1/forward', { params })
-            var lat = resp.data.data[0].latitude;
-            var lang = resp.data.data[0].longitude;
-
+          
+            if (!resp.data.data[0]) {
+                return res.status(400).send({
+                    message: 'Please add a valid address'
+                })
+            }
+            const lat = resp.data.data[0].latitude;
+            const lang = resp.data.data[0].longitude;
 
             await Users.findOneAndUpdate({ _id: req.user.id }, {
                 phone: req.body.phone,
@@ -363,7 +360,7 @@ const userCtrl = {
     AddressUpdate: async (req, res) => {
         try {
             const user = await Users.findById(req.user.id)
-            console.log(user)
+           
             if (!user) return res.status(400).json({ msg: "User does not exist." })
 
             const params = {
@@ -373,8 +370,14 @@ const userCtrl = {
 
 
             const resp = await axios.get('http://api.positionstack.com/v1/forward', { params })
-            console.log('from address', resp.data.data[0])
-            console.log('from address ok', resp.data.data)
+
+            if (!resp.data.data[0]) {
+                return res.status(400).send({
+                    message: 'Please add a valid address'
+                })
+            }
+
+
             const lat = resp.data.data[0].latitude;
             const lang = resp.data.data[0].longitude;
 
@@ -411,8 +414,8 @@ const userCtrl = {
                 profile: req.body.profile
 
             })
-            console.log(req.body)
-            console.log('from edit', result)
+           
+          
             return res.json({ msg: "Completed" })
 
 
@@ -422,12 +425,12 @@ const userCtrl = {
     },
     deleteUser: async (req, res) => {
         try {
-            const result=await Users.findByIdAndDelete(req.user.id)
-     
-            if(result?._id){
+            const result = await Users.findByIdAndDelete(req.user.id)
+
+            if (result?._id) {
                 res.status(200).send({
-                    data:result,
-                    status:true
+                    data: result,
+                    status: true
                 })
             }
         } catch (error) {
@@ -462,7 +465,7 @@ const userCtrl = {
 
 }
 const createAccessToken = (user) => {
-    console.log('from access', user)
+  
     return jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '1d' })
 }
 const createRefreshToken = (user) => {

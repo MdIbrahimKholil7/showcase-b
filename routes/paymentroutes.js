@@ -59,11 +59,11 @@ router.post("/verify", async (req, res) => {
 router.patch("/changerole", auth,  async (req, res) => {
 	try {
 
-		console.log("PAIN")
+		
 		const user = await Users.findById(req.user.id)
 		if (!user) return res.status(400).json({ msg: "User does not exist." })
 
-		console.log("KONAN")
+		
 		const response = await Users.findOneAndUpdate({ _id: req.user.id }, {
 			role: req.body.role
 		})

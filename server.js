@@ -48,13 +48,13 @@ app.use('/api/payment',paymentRoute)
 
 app.post("/user/saved", async (req, res) => {
   let { videoId, VideoLink, productId,latitude,longitude } = req.body;
-  //console.log(videoId, VideoLink);
+  
   videoId = mongoose.Types.ObjectId(videoId);
   
   try {
     // here videoId -userid check if user exist or not
     let check = await Saved.exists({ videoId: videoId });
-    // console.log(check);
+
     if (check) {
       let data = await Saved.findOne({ videoId: videoId });
       let newLink = data.VideoLink;
@@ -78,12 +78,12 @@ app.post("/user/saved", async (req, res) => {
         latitude,
         longitude,
       });
-      console.log(saved);
+    
       await saved.save();
       res.json({ message: 1 });
     }
   } catch (err) {
-    console.log(err);
+  
     res.json({
       message: "Something went wrong",
     });
@@ -97,7 +97,7 @@ app.get("/user/saved/:id", (req, res) => {
       res.json(data);
     })
     .catch((err) => {
-      console.log(err);
+    
       res.json({ message: "Something went wrong", err });
     });
 });

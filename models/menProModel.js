@@ -37,7 +37,7 @@ const menSchema = new mongoose.Schema({
         default: ""
     },
     price: {
-        type: String,
+        type: Number,
         required: true
     },
     discount:{

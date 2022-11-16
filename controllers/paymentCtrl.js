@@ -22,7 +22,7 @@ const emailClient = nodemailer.createTransport(sgTransport(emailOptions));
 
 // send nodemailer 
 const sendEmail = (details) => {
-    console.log('Email sender')
+    
     // const { email, treatmentName, patientName, slot, date } = query
     const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = details.response || {}
     const { email, userId, plan, name, amount } = details || {}
@@ -75,7 +75,7 @@ const paymentCtrl = {
                 data: order
             })
 
-            console.log(order)
+           
         } catch (error) {
             next(error)
         }
@@ -100,7 +100,7 @@ const paymentCtrl = {
 
     // verify payment 
     verifyPayment: async (req, res) => {
-        console.log('from body', req.body)
+       
         try {
             const { razorpay_payment_id, razorpay_order_id, razorpay_signature } = req.body.response || {}
             const { email, userId, plan, } = req.body || {}
@@ -152,9 +152,9 @@ const paymentCtrl = {
     getPaymentDetails: async (req, res) => {
         try {
             const { id } = req.params
-            console.log(req.params)
+          
             const result = await Payment.findOne({ user: id })
-            console.log('result', result)
+        
             res.status(200).send({
                 message: 'Success',
                 data: result,

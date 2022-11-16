@@ -57,8 +57,8 @@ class APIfeatures {
 // for posting video 
 const saveVideo = async (Collection, data, res) => {
     const { link, companyName, email, productBrand, productType, category, price, description, userId, discount, videoOwner } = data?.data || {};
-    // console.log('data', data?.video)
-    // console.log('from data',data)
+    
+    const productPrice=Number(price)
     const newProduct = new Collection({
         link: data?.video,
         companyName,
@@ -66,7 +66,7 @@ const saveVideo = async (Collection, data, res) => {
         brand: productBrand,
         type: productType,
         category,
-        price,
+        price:productPrice,
         Description: description,
         discount,
         userId: data?.userId,
@@ -81,7 +81,7 @@ const saveVideo = async (Collection, data, res) => {
         brand: productBrand,
         type: productType,
         category,
-        price,
+        price:productPrice,
         Description: description,
         discount,
         productId: result?._id,
@@ -90,7 +90,7 @@ const saveVideo = async (Collection, data, res) => {
     })
 
     const itemResult = await newItem.save()
-    console.log('result', result)
+   
     res.json({ msg: "Created a product", result })
 }
 
@@ -154,7 +154,7 @@ const productCtrl = {
     createProduct: async (req, res) => {
         try {
             const { link, companyName, email, productBrand, productType, category, price, Description, latitude, longitude, } = req.body.data || {};
-            console.log('createProduct', req.body);
+           
 
             if (!req?.body?.video) return res.status(400).json({ msg: "No video upload" })
 
@@ -185,14 +185,14 @@ const productCtrl = {
     getMinPrice: async (req, res) => {
 
         try {
-            const { content,inputSearch } = req.query || {}
-            console.log('min price',req.query)
+            const { content, inputSearch } = req.query || {}
+           
             switch (content) {
 
                 case 'Men':
-                    const min = await Men.find().sort({ price: -1 }).limit(1)
-                    const max = await Men.find().sort({ price: 1 }).limit(1)
-            
+                    const min = await Men.find().sort({ price: 1 }).limit(1)
+                    const max = await Men.find().sort({ price: -1 }).limit(1)
+
                     return res.status(200).send({
                         data: {
                             min: min[0]?.price,
@@ -229,8 +229,9 @@ const productCtrl = {
 
 
                 case 'allVideo':
-                    const minP = await ProUser.find().sort({ price: 1 }).limit(1)
-                    const maxP = await ProUser.find().sort({ price: -1 }).limit(1)
+                    const minP = await ProUser.find({}).sort({ price: 1 })
+                    const maxP = await ProUser.find({}).sort({ price: -1 }).limit(1)
+                 
                     return res.status(200).send({
                         data: {
                             min: minP[0]?.price,
@@ -255,7 +256,7 @@ const productCtrl = {
                             { brand: new RegExp(inputSearch, 'i') },
                         ]
                     }).sort({ price: -1 }).limit(1)
-                    console.log(minSearchP,maxSearchP)
+                   
                     return res.status(200).send({
                         data: {
                             min: minSearchP[0]?.price,
@@ -282,7 +283,7 @@ const productCtrl = {
     getFilterProduct: async (req, res) => {
         try {
             const { content, user, sortedBy, maxPrice, size, page } = req.query || {}
-            console.log('query', req.query)
+          
             switch (user) {
 
                 case "Men":
@@ -293,7 +294,7 @@ const productCtrl = {
                         {
                             $match: {
                                 $and: [
-                                    { price: { "$lte": maxPrice } },
+                                    { price: { "$lte": +maxPrice } },
                                     { category: new RegExp(content, 'i') }
                                 ]
                             },
@@ -302,8 +303,8 @@ const productCtrl = {
                         { $skip: (+size) * (+page) },
                         { $limit: +size }
                     ])
-                 
-                    console.log('men result',result)
+
+                    console.log('men result', result)
                     return res.status(200).send({
                         result,
                         count
@@ -315,7 +316,7 @@ const productCtrl = {
                         {
                             $match: {
                                 $and: [
-                                    { price: { "$lte": maxPrice } },
+                                    { price: { "$lte": +maxPrice } },
                                     { category: new RegExp(content, 'i') }
                                 ]
                             },
@@ -337,7 +338,7 @@ const productCtrl = {
                         {
                             $match: {
                                 $and: [
-                                    { price: { "$lte": maxPrice } },
+                                    { price: { "$lte": +maxPrice } },
                                     { category: new RegExp(content, 'i') }
                                 ]
                             },
@@ -359,8 +360,8 @@ const productCtrl = {
                         {
                             $match: {
                                 $and: [
-                                    { price: { "$lte": maxPrice } },
-                                    { category: new RegExp(content, 'i','//' ) }
+                                    { price: { "$lte": +maxPrice } },
+                                    { category: new RegExp(content, 'i', '//') }
                                 ]
                             },
                         },
@@ -381,7 +382,7 @@ const productCtrl = {
                     const allProduct = await ProUser.aggregate([
                         {
                             $match: {
-                                price: { $lte: maxPrice }
+                                price: { $lte: +maxPrice }
                             }
                         },
                         {
@@ -396,7 +397,7 @@ const productCtrl = {
 
 
                     ])
-                    // console.log(allProduct)
+                  
                     return res.status(200).send({
                         result: allProduct,
                         count
@@ -408,7 +409,7 @@ const productCtrl = {
                         {
                             $match: {
                                 $and: [
-                                    { price: { "$lte": maxPrice } },
+                                    { price: { "$lte": +maxPrice } },
                                 ],
                                 $or: [
                                     { category: new RegExp(content, 'i') },
@@ -430,7 +431,7 @@ const productCtrl = {
 
                     ])
 
-                    // console.log('search result',searchProduct)
+                    
                     return res.status(200).send({
                         result: searchProduct,
                         count
@@ -453,7 +454,7 @@ const productCtrl = {
         try {
             const { id } = req.params || {}
 
-            const result = await ProUser.find({ _id: id }).populate('videoOwner', 'latitude longitude country phone ')
+            const result = await ProUser.find({ _id: id }).populate('videoOwner', 'latitude longitude country phone address')
 
             res.status(200).send({
                 message: "success",
@@ -467,10 +468,10 @@ const productCtrl = {
             })
         }
     },
-    getLatestVideo:async(req,res)=>{
+    getLatestVideo: async (req, res) => {
         try {
-            const result=await ProUser.find().sort({createdAt:-1}).limit(10)
-            res.send({data:result})
+            const result = await ProUser.find().sort({ createdAt: -1 }).limit(10)
+            res.send({ data: result })
         } catch (error) {
             console.log(error)
         }
@@ -529,12 +530,12 @@ const productCtrl = {
     },
     bestSellerVideo: async (req, res) => {
         try {
-         
-            const result=await ProUser.aggregate( [
+
+            const result = await ProUser.aggregate([
                 { $addFields: { total: { $size: "$saved" } } },
                 { $sort: { total: -1 } },
                 { $limit: 2 }
-             ] )
+            ])
 
             res.status(200).send({
                 data: result
