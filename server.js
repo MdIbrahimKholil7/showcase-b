@@ -26,7 +26,11 @@ const s3 = new aws.S3({
   signatureVersion: "v4",
 });
 // cors creadintial
-app.use(express.json());
+app.use(express.json({
+  origin:['http://localhost:3000','https://api.showcaseurbusiness.com'],
+  credentials:true,
+  optionSuccessStatus:200
+}));
 app.use(cookieParser(process.env.ACCESS_TOKEN_SECRET));
 app.use(cors())
 
