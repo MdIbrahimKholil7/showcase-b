@@ -1,5 +1,5 @@
 require("dotenv").config();
-const aws=require("aws-sdk");
+const aws = require("aws-sdk");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
@@ -11,8 +11,9 @@ const User = require("./models/userModel");
 const client = require("twilio")(process.env.acountSID, process.env.authToken);
 const app = express();
 // const paymentRoute=require('./routes/paymentRoute.js')
-const paymentRoute=require('./routes/paymentroutes.js')
-const reviewRoute=require('./routes/reviewRoute')
+const paymentRoute = require('./routes/paymentroutes.js')
+const reviewRoute = require('./routes/reviewRoute')
+const messageRoute = require('./routes/messageRoute')
 // AWS.config.update({
 //   accessKeyId: "AKIAR3UTLLOPFFCEOVXL",
 //   secretAccessKey: "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",
@@ -30,27 +31,30 @@ app.use(cookieParser(process.env.ACCESS_TOKEN_SECRET));
 app.use(cors())
 
 app.use(fileUpload({ useTempFiles: true }));
-app.post('s3Url',async(req,res)=>{
-   const videoname=req.body.fn;
-   const params = {
-     Bucket: "showcaseapp23",
-     Key: videoname,
-     Expires: 60,
-     
-   };
-   
-   const uploadUrl=await s3.getSignedUrl("putObject",params);
-    res.json({uploadUrl,videoname});
+app.post('s3Url', async (req, res) => {
+  const videoname = req.body.fn;
+  const params = {
+    Bucket: "showcaseapp23",
+    Key: videoname,
+    Expires: 60,
+
+  };
+
+  const uploadUrl = await s3.getSignedUrl("putObject", params);
+  res.json({ uploadUrl, videoname });
 })
 
 // payment route 
-app.use('/api/payment',paymentRoute)
+app.use('/api/payment', paymentRoute)
+// message route 
+app.use('/api/message', messageRoute)
+
 
 app.post("/user/saved", async (req, res) => {
-  let { videoId, VideoLink, productId,latitude,longitude } = req.body;
-  
+  let { videoId, VideoLink, productId, latitude, longitude } = req.body;
+
   videoId = mongoose.Types.ObjectId(videoId);
-  
+
   try {
     // here videoId -userid check if user exist or not
     let check = await Saved.exists({ videoId: videoId });
@@ -78,12 +82,12 @@ app.post("/user/saved", async (req, res) => {
         latitude,
         longitude,
       });
-    
+
       await saved.save();
       res.json({ message: 1 });
     }
   } catch (err) {
-  
+
     res.json({
       message: "Something went wrong",
     });
@@ -97,7 +101,7 @@ app.get("/user/saved/:id", (req, res) => {
       res.json(data);
     })
     .catch((err) => {
-    
+
       res.json({ message: "Something went wrong", err });
     });
 });
@@ -115,9 +119,9 @@ app.delete("/user/delete/:id", (req, res) => {
 
 
 
-app.patch("/updatePass", async(req, res) => {
+app.patch("/updatePass", async (req, res) => {
   let { newpass, email } = req.body;
-  newpass=await bcrypt.hash(newpass,10);
+  newpass = await bcrypt.hash(newpass, 10);
   User.findOne({ email: email }).then((data) => {
     if (data) {
       data.password = newpass;
@@ -137,7 +141,7 @@ app.post("/onetimepassword", (req, res) => {
     .services(process.env.serviceID)
     .verifications.create({ to: `+${country}${phone}`, channel: "sms" })
     .then((verification) => {
-    
+
       res.json({ message: "OTP sent successfully" });
     })
     .catch((err) => {
@@ -214,7 +218,7 @@ app.use('/review', reviewRoute)
 // Connect to mongodb
 
 const URI = process.env.MONGODB_URL;
-mongoose.connect(URI,  {
+mongoose.connect(URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }, (err) => {
@@ -223,11 +227,46 @@ mongoose.connect(URI,  {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log("server is running on port", PORT);
 });
 
+const io = require("socket.io")(server, {
+  pingTimeout: 60000,
+  cors: {
+    origin: "http://localhost:3000",
+    credentials: true,
+  },
+});
 
+// io.on("connection", (socket) => {
+//   console.log("Connected to socket.io");
+//   socket.emit('msg', 'this is message')
+//   socket.on('disconnect', () => {
+//     console.log('user disconnected')
+//   })
+// })
 
+global.onlineUsers = new Map();
 
+io.on("connection", (socket) => {
+  global.chatSocket = socket;
+  socket.on("add-user", (userId) => {
+    // console.log('userid',userId)
+    // console.log('userid',socket.id)
 
+    onlineUsers.set(userId, socket.id);
+  });
+
+  socket.on("send-msg", (data) => {
+    console.log('data',data)
+    // console.log(onlineUsers.get())
+    const sendUserSocket = onlineUsers.get(data.to);
+    // console.log('senduser',sendUserSocket)
+    console.log('send message',data)
+    if (sendUserSocket) {
+      console.log('msg',data)
+     socket.to(sendUserSocket).emit("msg-recieve", data.msg);
+    }
+  });
+});

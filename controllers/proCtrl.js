@@ -470,7 +470,7 @@ const productCtrl = {
     },
     getLatestVideo: async (req, res) => {
         try {
-            const result = await ProUser.find().sort({ createdAt: -1 }).limit(10)
+            const result = await ProUser.find().sort({ createdAt: -1 }).limit(8)
             res.send({ data: result })
         } catch (error) {
             console.log(error)

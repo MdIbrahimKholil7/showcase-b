@@ -4,23 +4,24 @@ const Payment = new mongoose.Schema({
 
     plan: {
         type: String,
-
+        required:true
     },
-    orderId: {
+    name: {
         type: String,
-
+        required:true
     },
-    orderEmail: {
+    email: {
         type: String,
-
+        required:true
     },
-    paymentId: {
+    transactionId: {
         type: String,
-
+        required: true
     },
-    user: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'userSchema'
+    userId: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'Users',
+        required:true
     }
 },
     {
