@@ -31,9 +31,15 @@ const s3 = new aws.S3({
 app.use(express.json());
 app.use(cookieParser(process.env.ACCESS_TOKEN_SECRET));
 app.use(cors({
-  origin:['http://localhost:3000','https://api.showcaseurbusiness.com'],
-  credentials:true,
-  optionSuccessStatus:200
+  origin: [
+    'http://localhost:3000',
+    'https://api.showcaseurbusiness.com',
+    'https://app.showcaseurbusiness.com',
+    'https://www.showcaseurbusiness.com',
+    'https://showcaseurbusiness.com',
+  ],
+  credentials: true,
+  optionSuccessStatus: 200
 }))
 
 app.use(fileUpload({ useTempFiles: true }));
@@ -265,14 +271,14 @@ io.on("connection", (socket) => {
   });
 
   socket.on("send-msg", (data) => {
-    console.log('data',data)
+    console.log('data', data)
     // console.log(onlineUsers.get())
     const sendUserSocket = onlineUsers.get(data.to);
     // console.log('senduser',sendUserSocket)
-    console.log('send message',data)
+    console.log('send message', data)
     if (sendUserSocket) {
-      console.log('msg',data)
-     socket.to(sendUserSocket).emit("msg-recieve", data.msg);
+      console.log('msg', data)
+      socket.to(sendUserSocket).emit("msg-recieve", data.msg);
     }
   });
 });
