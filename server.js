@@ -239,6 +239,16 @@ mongoose.connect(URI, {
 });
 
 const PORT = process.env.PORT || 5000;
+app.get('/check-server', async (req, res) => {
+  try {
+    res.status(200).json({
+      message: "Success",
+      status: 200
+    })
+  } catch (error) {
+    console.log(error)
+  }
+})
 const server = app.listen(PORT, () => {
   console.log("server is running on port", PORT);
 });
@@ -251,13 +261,6 @@ const io = require("socket.io")(server, {
   },
 });
 
-// io.on("connection", (socket) => {
-//   console.log("Connected to socket.io");
-//   socket.emit('msg', 'this is message')
-//   socket.on('disconnect', () => {
-//     console.log('user disconnected')
-//   })
-// })
 
 global.onlineUsers = new Map();
 
