@@ -30,9 +30,13 @@ const s3 = new aws.S3({
 // cors creadintial
 app.use(express.json());
 app.use(cookieParser(process.env.ACCESS_TOKEN_SECRET));
+app.use(cors())
+
+
 // app.use(cors({
 //   origin: [
 //     'http://localhost:3000/',
+//     'http://localhost:3000',
 //     'https://api.showcaseurbusiness.com',
 //     'https://app.showcaseurbusiness.com',
 //     'https://www.showcaseurbusiness.com',
@@ -41,7 +45,8 @@ app.use(cookieParser(process.env.ACCESS_TOKEN_SECRET));
 //   credentials: true,
 //   optionSuccessStatus: 200
 // }))
-app.use(cors())
+
+// app.use(cors())
 app.use(fileUpload({ useTempFiles: true }));
 app.post('s3Url', async (req, res) => {
   const videoname = req.body.fn;
@@ -128,7 +133,6 @@ app.delete("/user/delete/:id", (req, res) => {
       console.log({ error: err, message: "Something went wrong" });
     });
 });
-
 
 
 app.patch("/updatePass", async (req, res) => {
@@ -239,6 +243,7 @@ mongoose.connect(URI, {
 });
 
 const PORT = process.env.PORT || 5000;
+// for check api
 app.get('/check-server', async (req, res) => {
   try {
     res.status(200).json({
