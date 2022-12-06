@@ -6,8 +6,7 @@ const chatCtrl = {
     addMessage: async (req, res) => {
         try {
             const { to, text } = req.body
-            // console.log(req.body)
-            console.log('user ',to)
+            
             const result = await Chat.create({
                 message: text,
                 users: [req.user.id, to],
@@ -31,8 +30,7 @@ const chatCtrl = {
     addMessageSupport: async (req, res) => {
         try {
             const { to, text } = req.body
-            // console.log(req.body)
-            // console.log(req.user.id)
+         
             const result = await Chat.create({
                 message: text,
                 users: [req.user.id, to],
@@ -42,7 +40,7 @@ const chatCtrl = {
                 latestMessage: text,
                 sender: to
             }, { upsert: true })
-            // console.log(latestMessage)
+           
             res.send({
                 message: 'success',
                 data: result
@@ -56,11 +54,9 @@ const chatCtrl = {
 
     getAllMessage: async (req, res) => {
         try {
-            // const { to, } = req.body
-            // console.log(req.params.id)
+           
             const { id } = req.params
-            // console.log(req.id)
-            // console.log(ObjectId.isValid(id))
+          
 
             if (!ObjectId.isValid(id)) return res.send({
                 data: []
@@ -68,7 +64,7 @@ const chatCtrl = {
             const result = await Chat.find({
                 users: { $all: [req?.user?.id, id] }
             })
-            // console.log(result)
+        
             const findResult = result.map((message) => {
                 return {
                     fromSelf: message.sender.toString() === req?.user?.id,
@@ -93,7 +89,7 @@ const chatCtrl = {
                 message: 'Success',
                 data: result
             })
-            console.log(result)
+        
         } catch (error) {
             console.log(error)
         }
@@ -104,7 +100,7 @@ const chatCtrl = {
             res.send({
                 data:req.user.id
             })
-            // console.log(result)
+         
         } catch (error) {
             console.log(error)
         }

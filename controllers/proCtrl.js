@@ -137,9 +137,7 @@ const productCtrl = {
 
     getAdminVideo: async (req, res) => {
         try {
-            console.log('user', req.user.id)
-
-
+          
             const result = await ProUser.find({ userId: req.user.id })
             res.status(200).send({
                 message: 'Success',
@@ -202,7 +200,7 @@ const productCtrl = {
                 case 'Women':
                     const minWP = await Women.find().sort({ price: 1 }).limit(1)
                     const maxWP = await Women.find().sort({ price: -1 }).limit(1)
-                    // console.log("maxw",maxWP)
+                   
                     return res.status(200).send({
                         data: {
                             min: minWP[0]?.price,
@@ -305,7 +303,7 @@ const productCtrl = {
                         { $limit: +size }
                     ])
 
-                    console.log('men result', result)
+                  
                     return res.status(200).send({
                         result,
                         count

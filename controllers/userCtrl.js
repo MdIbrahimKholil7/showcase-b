@@ -79,7 +79,7 @@ const userCtrl = {
 
     validation: async (req, res) => {
         try {
-            console.log('user',req?.user)
+            
             const result = await Users.findById(req?.user?.id)
             if (req?.user?.id) {
                 res.status(200).json({
@@ -122,7 +122,7 @@ const userCtrl = {
                     accesstoken = createAccessToken({ id: user._id })
                     refreshtoken = createRefreshToken({ id: user._id })
                     userrole = await Users.findById(user._id).select('role')
-                    console.log(user, 'from google')
+                   
                 }
             } else {
 

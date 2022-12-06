@@ -161,7 +161,7 @@ const paymentCtrl = {
                 status: 200
             })
         } catch (error) {
-            console.log(error.message)
+        
             res.status(400).send({
                 error: error?.message,
                 message: 'Failed to load'
