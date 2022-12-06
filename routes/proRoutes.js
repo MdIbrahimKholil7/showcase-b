@@ -22,4 +22,5 @@ router.get('/min-max-price', productCtrl.getMinPrice)
 router.get('/best-seller-video',productCtrl.bestSellerVideo)
 router.get('/get-product', productCtrl.getFilterProduct)
 router.get('/get-latest-video',productCtrl.getLatestVideo)
+
 module.exports = router

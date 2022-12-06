@@ -202,6 +202,7 @@ const productCtrl = {
                 case 'Women':
                     const minWP = await Women.find().sort({ price: 1 }).limit(1)
                     const maxWP = await Women.find().sort({ price: -1 }).limit(1)
+                    // console.log("maxw",maxWP)
                     return res.status(200).send({
                         data: {
                             min: minWP[0]?.price,
@@ -273,9 +274,9 @@ const productCtrl = {
             }
         } catch (error) {
             console.log(error)
-            res.status(500).send({
-                message: "Internal server error"
-            })
+            // res.status(500).send({
+            //     message: "Internal server error"
+            // })
         }
     },
 

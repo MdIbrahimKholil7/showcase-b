@@ -24,7 +24,7 @@ router.post("/orders", async (req, res) => {
 
 		instance.orders.create(options, (error, order) => {
 			if (error) {
-				console.log(error);
+			
 				return res.status(500).json({ message: "Something Went Wrong!" });
 			}
 			res.status(200).json({ data: order });
@@ -40,8 +40,7 @@ router.put("/verify", async (req, res) => {
 	try {
 		const { razorpay_order_id, razorpay_payment_id, razorpay_signature } =
 			req.body.response;
-		console.log('payment verify', req.body)
-		console.log(req.body.pay)
+	
 		if (req.body.pay === 400) {
 			amount = 'Silver'
 		}
@@ -69,7 +68,7 @@ router.put("/verify", async (req, res) => {
 				transactionId: razorpay_payment_id,
 				plan: amount
 			},{ upsert: true })
-			console.log(result)
+		
 			return res.status(200).json(
 				{
 					message: "Payment verified successfully"
@@ -86,9 +85,9 @@ router.put("/verify", async (req, res) => {
 
 router.get('/get-payment-details', async (req, res) => {
 	try {
-		console.log(req.query)
+		
 		const result = await Payment.findOne({ email: req.query.email })
-		console.log(result)
+
 		res.status(200).send({
 			message: 'Success',
 			data: result
@@ -100,22 +99,6 @@ router.get('/get-payment-details', async (req, res) => {
 })
 
 
-// router.patch("/changerole", auth, async (req, res) => {
-// 	try {
 
-
-// 		const user = await Users.findById(req.user.id)
-// 		if (!user) return res.status(400).json({ msg: "User does not exist." })
-
-
-// 		const response = await Users.findOneAndUpdate({ _id: req.user.id }, {
-// 			role: req.body.role
-// 		})
-
-// 		return res.json({ msg: "Role changed" })
-// 	} catch (err) {
-// 		return res.status(500).json({ msg: err.message })
-// 	}
-// });
 
 module.exports = router;
