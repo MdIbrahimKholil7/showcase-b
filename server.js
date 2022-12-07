@@ -30,21 +30,22 @@ const s3 = new aws.S3({
 // cors creadintial
 app.use(express.json());
 app.use(cookieParser(process.env.ACCESS_TOKEN_SECRET));
-app.use(cors())
+// app.use(cors())
 
 
-// app.use(cors({
-//   origin: [
-//     'http://localhost:3000/',
-//     'http://localhost:3000',
-//     'https://api.showcaseurbusiness.com',
-//     'https://app.showcaseurbusiness.com',
-//     'https://www.showcaseurbusiness.com',
-//     'https://showcaseurbusiness.com',
-//   ],
-//   credentials: true,
-//   optionSuccessStatus: 200
-// }))
+app.use(cors({
+  origin: [
+    'http://localhost:3000/',
+    'http://localhost:3000',
+    'https://api.showcaseurbusiness.com',
+    'https://app.showcaseurbusiness.com',
+    'https://www.showcaseurbusiness.com',
+    'https://showcaseurbusiness.com',
+    'https://showcaseurbusiness.com/',
+  ],
+  credentials: true,
+  optionSuccessStatus: 200
+}))
 
 // app.use(cors())
 app.use(fileUpload({ useTempFiles: true }));
