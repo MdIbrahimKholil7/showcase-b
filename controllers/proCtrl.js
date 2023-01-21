@@ -452,9 +452,7 @@ const productCtrl = {
     getSingleProduct: async (req, res) => {
         try {
             const { id } = req.params || {}
-
             const result = await ProUser.find({ _id: id }).populate('videoOwner', 'latitude longitude country phone address')
-
             res.status(200).send({
                 message: "success",
                 result
@@ -557,10 +555,6 @@ const productCtrl = {
             return res.status(500).json({ msg: err.message })
         }
     }
-
-
-
-
 }
 
 
